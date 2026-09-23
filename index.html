@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#dff6e8">
   <meta name="description" content="A tiny interactive slime pet that lives in your browser.">
   <title>Pet Slime</title>
-  <link rel="stylesheet" href="styles.css?v=20260923-7">
+  <link rel="stylesheet" href="styles.css?v=20260923-8">
   <style>
     .panel {
       background: rgba(255,255,255,.44) !important;
@@ -47,7 +47,7 @@
     .care-option:hover { transform:translateY(-1px); }
     .care-option:active { transform:scale(.93); }
     .care-option.active { background:rgba(255,255,255,.96); box-shadow:0 0 0 3px rgba(91,176,131,.16),0 6px 15px rgba(52,94,74,.11); }
-    .care-option span:first-child { font-size:1.05rem; line-height:1; font-weight:800; }
+    .care-option span:first-child { font-size:1.22rem; line-height:1; }
     .care-option span:last-child { display:none; }
 
     .floating-settings { position:absolute; right:12px; top:12px; z-index:40; pointer-events:auto; touch-action:manipulation; }
@@ -83,7 +83,6 @@
     }
     .toy.emoji-toy.show { opacity:1; }
 
-    /* PLAY - deliberately different spaces and paths */
     .toy.play-yarn { left:50%; bottom:54px; color:#9d6caf; font-size:2rem; }
     .toy.play-yarn.show { animation:yarnGround 3.6s ease-in-out both; }
     .toy.play-ball { left:50%; bottom:52px; color:#507ca8; font-size:2.15rem; }
@@ -157,7 +156,6 @@
       100% { opacity:0; transform:translate(126px,-12px) scale(.5); }
     }
 
-    /* HOME scenes: CSS-drawn so they do not depend on newer emoji fonts */
     .toy.home-tv,.toy.home-shower,.toy.home-bed { color:transparent; filter:none; }
 
     .toy.home-tv { left:50%; bottom:50px; width:92px; height:72px; z-index:3; }
@@ -208,7 +206,6 @@
     }
     .sleep-fx.long-rest.show { animation:zzz 5.7s ease both; }
 
-    /* COMMAND / TRICK interactions */
     .slime.cmd-highfive { animation:cmdHighFive 1.8s cubic-bezier(.2,.78,.25,1) both; z-index:12; }
     @keyframes cmdHighFive {
       0%,100% { transform:translate3d(var(--x),var(--y),0) scale(1); }
@@ -268,7 +265,7 @@
       .care-sheet { left:6px; width:84px; padding:6px; }
       .care-grid { grid-template-columns:repeat(2,32px); gap:6px; }
       .care-option { width:32px; height:32px; }
-      .care-option span:first-child { font-size:1rem; }
+      .care-option span:first-child { font-size:1.1rem; }
       .floating-settings { right:8px; top:8px; }
       .floating-settings .settings-toggle { width:34px; height:34px; font-size:1.05rem; }
       .floating-settings .settings-menu { width:min(178px,62vw); top:42px; }
@@ -312,27 +309,27 @@
         </div></section>
 
         <section id="care-play" class="care-sheet" aria-label="Play choices"><div class="care-grid">
-          <button class="care-option" data-play="yarn" aria-label="Yarn" title="Yarn"><span>Y</span><span>Yarn</span></button>
-          <button class="care-option" data-play="ball" aria-label="Ball" title="Ball"><span>●</span><span>Ball</span></button>
-          <button class="care-option" data-play="bubble" aria-label="Bubbles" title="Bubbles"><span>○</span><span>Bubbles</span></button>
-          <button class="care-option" data-play="feather" aria-label="Feather" title="Feather"><span>~</span><span>Feather</span></button>
-          <button class="care-option" data-play="butterfly" aria-label="Butterfly" title="Butterfly"><span>✦</span><span>Butterfly</span></button>
-          <button class="care-option" data-play="chase" aria-label="Light chase" title="Light chase"><span>•</span><span>Light chase</span></button>
+          <button class="care-option" data-play="yarn" aria-label="Yarn" title="Yarn"><span>🧶</span><span>Yarn</span></button>
+          <button class="care-option" data-play="ball" aria-label="Ball" title="Ball"><span>⚽</span><span>Ball</span></button>
+          <button class="care-option" data-play="bubble" aria-label="Bubbles" title="Bubbles"><span>🎈</span><span>Bubbles</span></button>
+          <button class="care-option" data-play="feather" aria-label="Feather" title="Feather"><span>🍃</span><span>Feather</span></button>
+          <button class="care-option" data-play="butterfly" aria-label="Butterfly" title="Butterfly"><span>🦋</span><span>Butterfly</span></button>
+          <button class="care-option" data-play="chase" aria-label="Light chase" title="Light chase"><span>✨</span><span>Light chase</span></button>
         </div></section>
 
         <section id="care-interact" class="care-sheet" aria-label="Command interactions"><div class="care-grid">
-          <button class="care-option" data-interact="highfive" aria-label="High five" title="High five"><span>↑</span><span>High five</span></button>
-          <button class="care-option" data-interact="peace" aria-label="Peace" title="Peace"><span>V</span><span>Peace</span></button>
-          <button class="care-option" data-interact="wave" aria-label="Wave" title="Wave"><span>~</span><span>Wave</span></button>
-          <button class="care-option" data-interact="hide" aria-label="Hide" title="Hide"><span>◀</span><span>Hide</span></button>
-          <button class="care-option" data-interact="dig" aria-label="Dig" title="Dig"><span>↓</span><span>Dig</span></button>
-          <button class="care-option" data-interact="dance" aria-label="Dance" title="Dance"><span>♪</span><span>Dance</span></button>
+          <button class="care-option" data-interact="highfive" aria-label="High five" title="High five"><span>🖐️</span><span>High five</span></button>
+          <button class="care-option" data-interact="peace" aria-label="Peace" title="Peace"><span>✌️</span><span>Peace</span></button>
+          <button class="care-option" data-interact="wave" aria-label="Wave" title="Wave"><span>👋</span><span>Wave</span></button>
+          <button class="care-option" data-interact="hide" aria-label="Hide" title="Hide"><span>🙈</span><span>Hide</span></button>
+          <button class="care-option" data-interact="dig" aria-label="Dig" title="Dig"><span>⛏️</span><span>Dig</span></button>
+          <button class="care-option" data-interact="dance" aria-label="Dance" title="Dance"><span>💃</span><span>Dance</span></button>
         </div></section>
 
         <section id="care-home" class="care-sheet" aria-label="Home and rest choices"><div class="care-grid">
-          <button class="care-option" data-home="tv" aria-label="TV" title="TV"><span>TV</span><span>TV</span></button>
-          <button class="care-option" data-home="shower" aria-label="Shower" title="Shower"><span>≋</span><span>Shower</span></button>
-          <button class="care-option" data-home="bed" aria-label="Bed" title="Bed"><span>Zz</span><span>Bed</span></button>
+          <button class="care-option" data-home="tv" aria-label="TV" title="TV"><span>📺</span><span>TV</span></button>
+          <button class="care-option" data-home="shower" aria-label="Shower" title="Shower"><span>🚿</span><span>Shower</span></button>
+          <button class="care-option" data-home="bed" aria-label="Bed" title="Bed"><span>😴</span><span>Bed</span></button>
         </div></section>
 
         <div class="floating-settings" aria-label="Pet settings">
@@ -360,15 +357,15 @@
         </section>
         <section class="actions" aria-label="Care areas">
           <button type="button" data-care="food"><span class="action-icon">🍓</span><span>Food</span></button>
-          <button type="button" data-care="play"><span class="action-icon">●</span><span>Play</span></button>
-          <button type="button" data-care="interact"><span class="action-icon">★</span><span>Interact</span></button>
-          <button type="button" data-care="home"><span class="action-icon">⌂</span><span>Home</span></button>
+          <button type="button" data-care="play"><span class="action-icon">🎮</span><span>Play</span></button>
+          <button type="button" data-care="interact"><span class="action-icon">👋</span><span>Interact</span></button>
+          <button type="button" data-care="home"><span class="action-icon">🏠</span><span>Home</span></button>
         </section>
       </section>
     </section>
   </main>
 
-  <script src="script.js?v=20260923-7"></script>
-  <script src="care.js?v=20260923-7"></script>
+  <script src="script.js?v=20260923-8"></script>
+  <script src="care.js?v=20260923-8"></script>
 </body>
 </html>
