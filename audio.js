@@ -101,6 +101,12 @@
         tone(base, .16, { endFreq: base + 285, type: 'sine', volume: .28 });
         break;
       }
+      case 'skip-step': {
+        const base = 330 + variant * 22;
+        tone(base, .085, { endFreq: base + 110, type: 'triangle', volume: .19 });
+        laterSound(() => tone(base + 95, .055, { endFreq: base + 45, type: 'sine', volume: .11 }), 55);
+        break;
+      }
       case 'whoosh':
         noise(.16, { filter: 'bandpass', frequency: 980 + variant * 110, q: 1.1, volume: .13 });
         break;
@@ -112,6 +118,11 @@
         tone(235, .2, { endFreq: 470, type: 'triangle', volume: .17 });
         noise(.16, { filter: 'bandpass', frequency: 900, volume: .08 });
         break;
+      case 'dance-beat':
+        tone(145, .08, { endFreq: 105, type: 'triangle', volume: .2 });
+        laterSound(() => noise(.05, { filter: 'bandpass', frequency: 1450, q: .9, volume: .08 }), 75);
+        laterSound(() => tone(520 + variant * 35, .07, { endFreq: 610 + variant * 30, type: 'sine', volume: .1 }), 120);
+        break;
       case 'impact':
         tone(115, .08, { endFreq: 80, type: 'triangle', volume: .32 });
         noise(.05, { frequency: 700, volume: .1 });
@@ -122,8 +133,9 @@
         laterSound(() => tone(520, .07, { endFreq: 650, volume: .18 }), 420);
         break;
       case 'dig':
-        noise(.2, { frequency: 520, volume: .13 });
-        laterSound(() => noise(.16, { frequency: 430, volume: .1 }), 230);
+        noise(.17, { filter: 'bandpass', frequency: 520 + variant * 45, q: .65, volume: .14 });
+        tone(115 + variant * 8, .08, { endFreq: 80, type: 'triangle', volume: .12 });
+        laterSound(() => noise(.11, { filter: 'highpass', frequency: 1250, volume: .07 }), 120);
         break;
       case 'bubble':
         tone(520, .13, { endFreq: 760, volume: .16 });
@@ -174,11 +186,11 @@
   function playMovement(kind) {
     clearScheduled();
     if (kind === 'jump') {
-      [[1020,0],[1850,1],[2740,2],[3680,1],[4440,0]].forEach(([t,v]) => laterSound(() => sfx('boing', v), t));
+      [[1080,0],[1880,1],[2730,2],[3710,1]].forEach(([t,v]) => laterSound(() => sfx('boing', v), t));
     } else if (kind === 'sprint') {
       [[520,0],[1120,1],[1780,2],[2440,1]].forEach(([t,v]) => laterSound(() => sfx('whoosh', v), t));
     } else if (kind === 'skip') {
-      [[760,0],[1550,1],[2350,0],[3150,1]].forEach(([t,v]) => laterSound(() => sfx('boing', v), t));
+      [[960,0],[2080,1],[3280,0]].forEach(([t,v]) => laterSound(() => sfx('skip-step', v), t));
     } else if (kind === 'dodge') {
       [[480,0],[1070,1],[1680,2],[2290,1],[2890,0]].forEach(([t,v]) => laterSound(() => sfx('whoosh', v), t));
     } else if (kind === 'roll') {
@@ -189,7 +201,11 @@
       laterSound(() => sfx('roll-fast'), 3150);
       laterSound(() => sfx('roll-fast'), 3550);
     } else if (kind === 'dance') {
-      sfx('chime');
+      sfx('dance-beat', 0);
+      laterSound(() => sfx('dance-beat', 1), 720);
+      laterSound(() => sfx('dance-beat', 2), 1450);
+      laterSound(() => sfx('dance-beat', 1), 2200);
+      laterSound(() => sfx('dance-beat', 0), 2870);
     }
   }
 
@@ -210,7 +226,11 @@
         else if (kind === 'peace') sfx('sparkle');
         else if (kind === 'wave') sfx('bloop');
         else if (kind === 'hide') sfx('hide');
-        else if (kind === 'dig') sfx('dig');
+        else if (kind === 'dig') {
+          laterSound(() => sfx('dig', 0), 420);
+          laterSound(() => sfx('dig', 1), 1000);
+          laterSound(() => sfx('dig', 2), 2050);
+        }
         else if (kind === 'bubble') sfx('bubble');
       });
     });
