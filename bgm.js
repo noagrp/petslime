@@ -20,7 +20,7 @@
     if(!menu||document.getElementById('background-music'))return;
     const anchor=document.getElementById('howto');
     const style=document.createElement('style');
-    style.textContent='.audio-range{margin-top:6px;padding:9px 11px;border:1px solid rgba(255,255,255,.84);border-radius:14px;background:rgba(255,255,255,.86);box-shadow:0 8px 22px rgba(52,94,74,.11);backdrop-filter:blur(14px)}.audio-range label{display:flex;justify-content:space-between;gap:8px;margin-bottom:6px;color:#516b5e;font-size:.73rem}.audio-range input{width:100%;accent-color:#55c987}';
+    style.textContent='.audio-range{margin-top:6px;padding:9px 11px;border:1px solid rgba(255,255,255,.84);border-radius:14px;background:rgba(255,255,255,.86);box-shadow:0 8px 22px rgba(52,94,74,.11);backdrop-filter:blur(14px)}.audio-range label{display:flex;justify-content:space-between;gap:8px;margin-bottom:6px;color:#516b5e;font-size:.73rem}.audio-range input{width:100%;accent-color:#55c987}.play-panel{background:rgba(35,52,46,.24)!important;border:1px solid rgba(255,255,255,.22)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 14px 34px rgba(25,42,35,.16)!important;backdrop-filter:blur(16px) saturate(.95);-webkit-backdrop-filter:blur(16px) saturate(.95)}.stage{background:linear-gradient(180deg,rgba(255,255,255,.025),rgba(18,34,28,.09));border-radius:30px}';
     document.head.appendChild(style);
     const toggle=document.createElement('button');
     toggle.id='background-music';toggle.type='button';
