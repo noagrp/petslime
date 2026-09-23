@@ -4,7 +4,7 @@
   const CACHE_KEY='petslime-bgm-catalog-v1';
   const API_URL='https://api.github.com/repos/noagrp/petslime/contents/bgm';
   const AUDIO_PATTERN=/\.(mp3|m4a|aac|ogg|wav|flac)$/i;
-  const CACHE_MS=30*60*1000;
+  const CACHE_MS=5*60*1000;
   let enabled=localStorage.getItem(ENABLE_KEY)!=='off';
   let volume=Math.max(0,Math.min(40,Number(localStorage.getItem(VOL_KEY)??12)||12));
   let activated=false;
