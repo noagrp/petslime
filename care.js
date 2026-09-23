@@ -1,12 +1,13 @@
 (() => {
   const sheets = [...document.querySelectorAll('.care-sheet')];
   const careButtons = [...document.querySelectorAll('[data-care]')];
-  const toyKinds = ['play-bubble','home-tv','home-shower','home-bed'];
+  const toyKinds = ['play-bubble','home-tv','home-game','home-shower','home-bed'];
   const commandKinds = ['cmd-highfive','cmd-peace','cmd-wave','cmd-hide-left','cmd-hide-right','cmd-dig','cmd-dance'];
   let activeCare = '';
   let commandTimer = 0;
   let activityTimer = 0;
   let wakeTimer = 0;
+  let bubbleTimers = [];
 
   function injectLatestStyles() {
     const style = document.createElement('style');
@@ -14,32 +15,29 @@
       .jump-mini{position:relative;width:22px;height:22px}
       .jump-mini::before{content:"";position:absolute;left:4px;bottom:2px;width:14px;height:11px;border-radius:55% 55% 42% 42%;background:linear-gradient(#9fe8bb,#58c98a);box-shadow:0 -7px 0 -5px #58c98a}
       .jump-mini::after{content:"";position:absolute;left:6px;top:0;width:10px;height:5px;border-top:2px solid #5b9f7a;border-radius:50%}
+      .game-mini{position:relative;width:22px;height:15px;border-radius:5px;background:#596b83;box-shadow:inset 0 0 0 2px rgba(255,255,255,.18)}
+      .game-mini::before{content:"";position:absolute;left:3px;top:5px;width:6px;height:2px;background:#dce7ef;box-shadow:2px -2px 0 -1px #dce7ef,2px 2px 0 -1px #dce7ef}
+      .game-mini::after{content:"";position:absolute;right:4px;top:5px;width:3px;height:3px;border-radius:50%;background:#f2c66f;box-shadow:-4px 3px 0 #7fc0d9}
 
-      .slime.bubble-blow{animation:bubbleBlowBody 5.2s ease-in-out both}
+      .slime.bubble-blow{animation:bubbleBlowBody 6.2s ease-in-out both}
       .slime.bubble-blow .mouth{top:82px;width:18px;height:18px;border:3px solid #315247;border-radius:50%;background:rgba(255,255,255,.18)}
       @keyframes bubbleBlowBody{
         0%,100%{transform:translate3d(var(--x),var(--y),0) scale(1)}
-        12%{transform:translate3d(calc(var(--x) - 5px),var(--y),0) scale(1.03,.98)}
-        28%{transform:translate3d(calc(var(--x) + 6px),calc(var(--y) - 2px),0) scale(.98,1.02)}
-        46%{transform:translate3d(calc(var(--x) - 4px),var(--y),0) scale(1.03,.98)}
-        64%{transform:translate3d(calc(var(--x) + 5px),calc(var(--y) - 2px),0) scale(.98,1.02)}
-        82%{transform:translate3d(var(--x),var(--y),0) scale(1.02,.99)}
+        10%{transform:translate3d(calc(var(--x) - 4px),var(--y),0) scale(1.03,.98)}
+        24%{transform:translate3d(calc(var(--x) + 5px),calc(var(--y) - 2px),0) scale(.98,1.02)}
+        40%{transform:translate3d(calc(var(--x) - 4px),var(--y),0) scale(1.03,.98)}
+        56%{transform:translate3d(calc(var(--x) + 5px),calc(var(--y) - 2px),0) scale(.98,1.02)}
+        72%{transform:translate3d(calc(var(--x) - 3px),var(--y),0) scale(1.03,.98)}
+        88%{transform:translate3d(var(--x),var(--y),0) scale(1.02,.99)}
       }
 
-      .toy.play-bubble{left:50%;bottom:132px;width:42px;height:42px}
-      .toy.play-bubble::before,.toy.play-bubble::after{content:"";position:absolute;border:3px solid #72b7ca;border-radius:50%;background:rgba(220,248,255,.2)}
-      .toy.play-bubble::before{width:23px;height:23px;left:8px;bottom:2px;box-shadow:22px -20px 0 -5px rgba(220,248,255,.18),22px -20px 0 -2px #72b7ca}
-      .toy.play-bubble::after{width:15px;height:15px;left:-3px;bottom:12px}
-      .toy.play-bubble.show{animation:bubblesFromMouth 5.2s ease-out both}
-      @keyframes bubblesFromMouth{
-        0%{opacity:0;transform:translate(2px,8px) scale(.25)}
-        8%{opacity:1;transform:translate(8px,-4px) scale(.55)}
-        22%{transform:translate(28px,-30px) scale(.75)}
-        38%{transform:translate(-18px,-64px) scale(.9)}
-        55%{transform:translate(34px,-104px) scale(1.05)}
-        72%{transform:translate(-26px,-145px) scale(1.16)}
-        88%{opacity:1;transform:translate(22px,-184px) scale(1.28)}
-        100%{opacity:0;transform:translate(-10px,-218px) scale(1.42)}
+      .viewer-bubble{position:absolute;z-index:18;pointer-events:none;border:3px solid #72b7ca;border-radius:50%;background:rgba(220,248,255,.18);box-shadow:inset 3px 3px 0 rgba(255,255,255,.55),0 8px 16px rgba(74,130,148,.11);animation:bubbleTowardViewer 1.55s ease-out forwards}
+      @keyframes bubbleTowardViewer{
+        0%{opacity:0;transform:translate(-50%,-50%) scale(.18)}
+        12%{opacity:1;transform:translate(-50%,-50%) scale(.35)}
+        55%{opacity:1;transform:translate(calc(-50% + var(--bx)),calc(-50% - 18px)) scale(1.05)}
+        86%{opacity:.82;transform:translate(calc(-50% + var(--bx2)),calc(-50% - 32px)) scale(1.8)}
+        100%{opacity:0;transform:translate(calc(-50% + var(--bx2)),calc(-50% - 42px)) scale(2.25)}
       }
 
       .slime.play-jump-multi{animation:playJumpMulti 4.7s cubic-bezier(.22,.74,.28,1) both}
@@ -58,6 +56,14 @@
         95%{transform:translate3d(var(--x),var(--y),0) scale(1.08,.9)}
       }
 
+      .toy.home-game{left:50%;bottom:72px;width:92px;height:58px;z-index:6;transform-origin:center}
+      .toy.home-game::before{content:"";position:absolute;left:-46px;top:8px;width:92px;height:48px;border-radius:14px;background:#596b83;box-shadow:0 8px 18px rgba(45,56,72,.18),inset 0 0 0 4px rgba(255,255,255,.12)}
+      .toy.home-game::after{content:"";position:absolute;left:-13px;top:18px;width:26px;height:20px;border-radius:4px;background:linear-gradient(145deg,#b9e5ed,#78acc4);box-shadow:-23px 7px 0 -9px #e6eef3,23px 7px 0 -9px #f0c369}
+      .toy.home-game.show{animation:gameRest 5.8s ease both}
+      @keyframes gameRest{0%{opacity:0;transform:translate(80px,10px) scale(.72)}12%,88%{opacity:1;transform:translate(42px,0) scale(1)}100%{opacity:0;transform:translate(42px,0) scale(.92)}}
+      .slime.game-face .eye{height:8px;top:63px;box-shadow:none}
+      .slime.game-face .mouth{top:87px;width:20px;height:10px}
+
       .toy.home-bed.show{animation:bedStayUntilWake 8.4s ease both!important}
       @keyframes bedStayUntilWake{
         0%{opacity:0;transform:translateX(-80px) scale(.82)}
@@ -73,6 +79,11 @@
         12%{transform:translate3d(var(--x),calc(var(--y) + 8px),0) scale(1.1,.86)}
         20%,88%{transform:translate3d(var(--x),calc(var(--y) + 12px),0) scale(1.15,.76)}
         100%{transform:translate3d(var(--x),var(--y),0) scale(1)}
+      }
+
+      @media(max-width:420px){
+        .toy.home-game.show{animation-name:gameRestPhone}
+        @keyframes gameRestPhone{0%{opacity:0;transform:translate(62px,10px) scale(.72)}12%,88%{opacity:1;transform:translate(30px,0) scale(.9)}100%{opacity:0;transform:translate(30px,0) scale(.84)}}
       }
     `;
     document.head.appendChild(style);
@@ -91,6 +102,7 @@
     if (homeGrid) {
       homeGrid.innerHTML = `
         <button class="care-option" data-home="tv" aria-label="TV" title="TV"><span>📺</span><span>TV</span></button>
+        <button class="care-option" data-home="game" aria-label="Gaming" title="Gaming"><span class="game-mini"></span><span>Gaming</span></button>
         <button class="care-option" data-home="shower" aria-label="Shower" title="Shower"><span>🚿</span><span>Shower</span></button>
         <button class="care-option" data-home="bed" aria-label="Bed" title="Bed"><span>😴</span><span>Bed</span></button>
       `;
@@ -106,8 +118,9 @@
   if(els.settingsToggle){els.settingsToggle.addEventListener('click',()=>{if(els.settingsToggle.getAttribute('aria-expanded')==='true')closeCare()})}
 
   function selectOption(button){const sheet=button.closest('.care-sheet');sheet?.querySelectorAll('.care-option').forEach(item=>item.classList.remove('active'));button.classList.add('active')}
-  function clearActivityTimers(){window.clearTimeout(activityTimer);window.clearTimeout(wakeTimer);activityTimer=0;wakeTimer=0}
-  function clearActivityClasses(){els.slime.classList.remove('bubble-blow','play-jump-multi','bed-sleeping')}
+  function clearBubbleTimers(){bubbleTimers.forEach(t=>window.clearTimeout(t));bubbleTimers=[]}
+  function clearActivityTimers(){window.clearTimeout(activityTimer);window.clearTimeout(wakeTimer);clearBubbleTimers();activityTimer=0;wakeTimer=0}
+  function clearActivityClasses(){els.slime.classList.remove('bubble-blow','play-jump-multi','bed-sleeping','game-face')}
   function setToy(kind,duration=3200){els.toy.classList.remove('show',...toyKinds);els.toy.classList.add('emoji-toy',kind);els.toy.textContent='';void els.toy.offsetWidth;replayFx(els.toy,'show',duration)}
 
   const foodInfo={
@@ -117,13 +130,33 @@
   function eat(symbol,button){const info=foodInfo[symbol]||['snack','•','food-crumb'];if(state.fullness>=96){react('tap-react',420);commit(`${state.name} is already completely full.`);return}selectOption(button);els.food.textContent=symbol;state.fullness+=18;state.happiness+=3;replayFx(els.food,'show',1100);react('feed-react',1100);window.setTimeout(()=>particles(info[1],7,info[2]),620);commit(`Yum! ${state.name} munches the ${info[0]}.`)}
   document.querySelectorAll('[data-food]').forEach(button=>button.addEventListener('click',()=>eat(button.dataset.food,button)));
 
+  function blowOneBubble(index){
+    const stageRect=els.stage.getBoundingClientRect();
+    const slimeRect=els.slime.getBoundingClientRect();
+    const bubble=document.createElement('span');
+    bubble.className='viewer-bubble';
+    const size=20+Math.round(Math.random()*10);
+    const mouthX=slimeRect.left-stageRect.left+slimeRect.width/2;
+    const mouthY=slimeRect.top-stageRect.top+slimeRect.height*.66;
+    bubble.style.width=`${size}px`;
+    bubble.style.height=`${size}px`;
+    bubble.style.left=`${mouthX}px`;
+    bubble.style.top=`${mouthY}px`;
+    const drift=(Math.random()-.5)*28;
+    bubble.style.setProperty('--bx',`${drift}px`);
+    bubble.style.setProperty('--bx2',`${drift*1.5}px`);
+    els.fx.appendChild(bubble);
+    window.setTimeout(()=>bubble.remove(),1700);
+  }
+
   function startBubblePlay(button){
     if(state.energy<10){replayFx(els.sleepFx,'show',1200);react('rest-react',850);commit(`${state.name} is too sleepy to play right now.`);return}
     clearActivityTimers();clearActivityClasses();selectOption(button);stopThrow();clearReactionClasses();state.happiness+=12;state.energy-=6;state.fullness-=2;
-    els.slime.classList.add('bubble-blow');setToy('play-bubble',5200);
-    window.setTimeout(()=>particles('○',4,'bubble-pop'),700);window.setTimeout(()=>particles('○',5,'bubble-pop'),1800);window.setTimeout(()=>particles('○',4,'bubble-pop'),3000);window.setTimeout(()=>particles('○',3,'bubble-pop'),4000);
-    commit(`${state.name} takes a breath and blows bubbles into the air.`);
-    activityTimer=window.setTimeout(()=>{els.slime.classList.remove('bubble-blow');els.slime.classList.add('idle')},5200);
+    els.slime.classList.add('bubble-blow');
+    const delays=[350,1250,2200,3200,4250,5250];
+    delays.forEach((delay,index)=>bubbleTimers.push(window.setTimeout(()=>blowOneBubble(index),delay)));
+    commit(`${state.name} blows bubbles toward you, one by one.`);
+    activityTimer=window.setTimeout(()=>{els.slime.classList.remove('bubble-blow');els.slime.classList.add('idle')},6200);
   }
 
   function startJumpPlay(button){
@@ -158,6 +191,13 @@
     setToy('home-tv',5200);react('pet-react',1200,'pet-face');repeatParticles('·',2,'tv-note',4,900);commit(`${state.name} settles down beside the TV for a proper rest.`);
   }
 
+  function startGame(button){
+    clearActivityTimers();clearActivityClasses();selectOption(button);state.happiness+=8;state.energy-=3;state.fullness-=1;
+    setToy('home-game',5800);stopThrow();clearReactionClasses();els.slime.classList.add('game-face');
+    repeatParticles('·',2,'light-dot',4,950);commit(`${state.name} settles in for a little gaming session.`);
+    activityTimer=window.setTimeout(()=>{els.slime.classList.remove('game-face');els.slime.classList.add('idle')},5800);
+  }
+
   function startShower(button){
     clearActivityTimers();clearActivityClasses();selectOption(button);state.energy+=5;state.happiness+=5;
     setToy('home-shower',4800);react('pet-react',1050,'pet-face');repeatParticles('|',5,'shower-drop',5,650);commit(`${state.name} stands under the shower and gets properly rinsed.`);
@@ -172,6 +212,9 @@
   }
 
   document.querySelectorAll('[data-home]').forEach(button=>button.addEventListener('click',()=>{
-    if(button.dataset.home==='tv')startTV(button);else if(button.dataset.home==='shower')startShower(button);else if(button.dataset.home==='bed')startBed(button);
+    if(button.dataset.home==='tv')startTV(button);
+    else if(button.dataset.home==='game')startGame(button);
+    else if(button.dataset.home==='shower')startShower(button);
+    else if(button.dataset.home==='bed')startBed(button);
   }));
 })();
