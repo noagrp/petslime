@@ -17,9 +17,9 @@
       .jump-mini{position:relative;width:22px;height:22px}
       .jump-mini::before{content:"";position:absolute;left:4px;bottom:2px;width:14px;height:11px;border-radius:55% 55% 42% 42%;background:linear-gradient(#9fe8bb,#58c98a);box-shadow:0 -7px 0 -5px #58c98a}
       .jump-mini::after{content:"";position:absolute;left:6px;top:0;width:10px;height:5px;border-top:2px solid #5b9f7a;border-radius:50%}
-      .game-mini{position:relative;width:22px;height:15px;border-radius:5px;background:#596b83;box-shadow:inset 0 0 0 2px rgba(255,255,255,.18)}
-      .game-mini::before{content:"";position:absolute;left:3px;top:5px;width:6px;height:2px;background:#dce7ef;box-shadow:2px -2px 0 -1px #dce7ef,2px 2px 0 -1px #dce7ef}
-      .game-mini::after{content:"";position:absolute;right:4px;top:5px;width:3px;height:3px;border-radius:50%;background:#f2c66f;box-shadow:-4px 3px 0 #7fc0d9}
+      .game-mini{position:relative;width:22px;height:14px}
+      .game-mini::before{content:"";position:absolute;left:1px;top:2px;width:20px;height:11px;border-radius:7px 7px 8px 8px;background:#596b83;box-shadow:inset 0 0 0 2px rgba(255,255,255,.14)}
+      .game-mini::after{content:"";position:absolute;left:4px;top:6px;width:5px;height:2px;background:#dce7ef;box-shadow:2px -2px 0 -1px #dce7ef,2px 2px 0 -1px #dce7ef,10px -1px 0 -1px #f2c66f,13px 1px 0 -1px #7fc0d9}
 
       .slime.bubble-blow{animation:bubbleBlowBody 6.2s ease-in-out both}
       .slime.bubble-blow .mouth{top:82px;width:18px;height:18px;border:3px solid #315247;border-radius:50%;background:rgba(255,255,255,.18)}
@@ -37,13 +37,13 @@
       .slime.play-jump-multi{animation:playJumpMulti 4.7s cubic-bezier(.22,.74,.28,1) both}
       @keyframes playJumpMulti{0%,100%{transform:translate3d(var(--x),var(--y),0) scale(1)}5%{transform:translate3d(var(--x),calc(var(--y) + 8px),0) scale(1.13,.82)}15%{transform:translate3d(calc(var(--x) - 48px),calc(var(--y) - 74px),0) scale(.94,1.08) rotate(-5deg)}23%{transform:translate3d(calc(var(--x) - 58px),var(--y),0) scale(1.15,.8)}31%{transform:translate3d(calc(var(--x) - 12px),calc(var(--y) - 94px),0) scale(.92,1.1) rotate(4deg)}40%{transform:translate3d(calc(var(--x) + 4px),var(--y),0) scale(1.17,.79)}49%{transform:translate3d(calc(var(--x) + 62px),calc(var(--y) - 82px),0) scale(.93,1.09) rotate(6deg)}58%{transform:translate3d(calc(var(--x) + 68px),var(--y),0) scale(1.16,.8)}68%{transform:translate3d(calc(var(--x) + 18px),calc(var(--y) - 105px),0) scale(.91,1.12) rotate(-4deg)}79%{transform:translate3d(var(--x),var(--y),0) scale(1.18,.78)}88%{transform:translate3d(calc(var(--x) - 16px),calc(var(--y) - 48px),0) scale(.97,1.05)}95%{transform:translate3d(var(--x),var(--y),0) scale(1.08,.9)}}
 
-      .toy.home-game{left:50%;bottom:72px;width:92px;height:58px;z-index:6;transform-origin:center}
-      .toy.home-game::before{content:"";position:absolute;left:-46px;top:8px;width:92px;height:48px;border-radius:14px;background:#596b83;box-shadow:0 8px 18px rgba(45,56,72,.18),inset 0 0 0 4px rgba(255,255,255,.12)}
-      .toy.home-game::after{content:"";position:absolute;left:-13px;top:18px;width:26px;height:20px;border-radius:4px;background:linear-gradient(145deg,#b9e5ed,#78acc4);box-shadow:-23px 7px 0 -9px #e6eef3,23px 7px 0 -9px #f0c369}
+      .toy.home-game{left:50%;bottom:72px;width:96px;height:62px;z-index:6;transform-origin:center}
+      .toy.home-game::before{content:"";position:absolute;left:-48px;top:13px;width:96px;height:42px;border-radius:24px 24px 20px 20px;background:linear-gradient(145deg,#66788f,#4f6076);box-shadow:0 8px 18px rgba(45,56,72,.18),inset 0 0 0 4px rgba(255,255,255,.10)}
+      .toy.home-game::after{content:"";position:absolute;left:-26px;top:28px;width:12px;height:4px;background:#dce7ef;box-shadow:4px -4px 0 -2px #dce7ef,4px 4px 0 -2px #dce7ef,46px -3px 0 -1px #f2c66f,52px 2px 0 -1px #7fc0d9}
       .toy.home-game.show{animation:gameRest 5.8s ease both}
-      .toy.home-game.game-flash::after{animation:gameScreenFlash .6s ease-out}
+      .toy.home-game.game-flash::after{animation:gameButtonFlash .65s ease-out}
       @keyframes gameRest{0%{opacity:0;transform:translate(80px,10px) scale(.72)}12%,88%{opacity:1;transform:translate(42px,0) scale(1)}100%{opacity:0;transform:translate(42px,0) scale(.92)}}
-      @keyframes gameScreenFlash{0%,100%{filter:brightness(1)}45%{filter:brightness(1.8);box-shadow:-23px 7px 0 -9px #e6eef3,23px 7px 0 -9px #f0c369,0 0 18px rgba(146,220,241,.8)}}
+      @keyframes gameButtonFlash{0%,100%{filter:brightness(1)}35%{filter:brightness(1.9);box-shadow:4px -4px 0 -2px #dce7ef,4px 4px 0 -2px #dce7ef,46px -3px 0 -1px #fff0a2,52px 2px 0 -1px #b8efff,46px -3px 10px 2px rgba(255,222,112,.75),52px 2px 10px 2px rgba(116,215,245,.7)}}
       .slime.game-face .eye{height:8px;top:63px;box-shadow:none}
       .slime.game-face .mouth{top:87px;width:20px;height:10px}
 
@@ -105,11 +105,7 @@
   function clearActivityClasses(){els.slime.classList.remove('bubble-blow','play-jump-multi','bed-sleeping','game-face');clearShadowAction()}
   function setToy(kind,duration=3200){els.toy.classList.remove('show',...toyKinds,'game-flash');els.toy.classList.add('emoji-toy',kind);els.toy.textContent='';void els.toy.offsetWidth;replayFx(els.toy,'show',duration)}
 
-  function groundPuff(count=2,soft=false,xOffset=0){
-    const stageRect=els.stage.getBoundingClientRect();const slimeRect=els.slime.getBoundingClientRect();
-    const cx=slimeRect.left-stageRect.left+slimeRect.width/2+xOffset;const cy=slimeRect.bottom-stageRect.top-4;
-    for(let i=0;i<count;i++){const puff=document.createElement('span');puff.className=`ground-puff${soft?' soft':''}`;puff.style.left=`${cx+(i-(count-1)/2)*10}px`;puff.style.top=`${cy}px`;puff.style.setProperty('--puff-x',`${(Math.random()-.5)*24}px`);els.fx.appendChild(puff);window.setTimeout(()=>puff.remove(),650)}
-  }
+  function groundPuff(count=2,soft=false,xOffset=0){const stageRect=els.stage.getBoundingClientRect();const slimeRect=els.slime.getBoundingClientRect();const cx=slimeRect.left-stageRect.left+slimeRect.width/2+xOffset;const cy=slimeRect.bottom-stageRect.top-4;for(let i=0;i<count;i++){const puff=document.createElement('span');puff.className=`ground-puff${soft?' soft':''}`;puff.style.left=`${cx+(i-(count-1)/2)*10}px`;puff.style.top=`${cy}px`;puff.style.setProperty('--puff-x',`${(Math.random()-.5)*24}px`);els.fx.appendChild(puff);window.setTimeout(()=>puff.remove(),650)}}
   function impactFlash(){const stageRect=els.stage.getBoundingClientRect();const slimeRect=els.slime.getBoundingClientRect();const flash=document.createElement('span');flash.className='impact-flash';flash.style.left=`${slimeRect.left-stageRect.left+slimeRect.width/2}px`;flash.style.top=`${slimeRect.top-stageRect.top+slimeRect.height*.35}px`;els.fx.appendChild(flash);window.setTimeout(()=>flash.remove(),500)}
 
   const foodInfo={'🍓':['strawberry','•','food-crumb'],'🍏':['green apple','●','apple-bit'],'🍪':['cookie','▪','cookie-bit'],'🍇':['grapes','●','grape-bit'],'🍉':['watermelon','◆','melon-bit'],'🥕':['carrot','▲','carrot-bit']};
@@ -121,27 +117,12 @@
   function startJumpPlay(button){if(state.energy<10){replayFx(els.sleepFx,'show',1200);react('rest-react',850);commit(`${state.name} is too sleepy to play right now.`);return}clearActivityTimers();clearActivityClasses();selectOption(button);stopThrow();clearReactionClasses();state.happiness+=13;state.energy-=8;state.fullness-=3;void els.slime.offsetWidth;els.slime.classList.add('play-jump-multi');shadowAction('jump',4700);[1080,1880,2780,3710,4470].forEach((delay,i)=>window.setTimeout(()=>groundPuff(i===4?2:1,true),delay));commit(`${state.name} jumps around the playground again and again!`);activityTimer=window.setTimeout(()=>{els.slime.classList.remove('play-jump-multi');els.slime.classList.add('idle')},4700)}
   document.querySelectorAll('[data-play]').forEach(button=>button.addEventListener('click',()=>{if(button.dataset.play==='bubble')startBubblePlay(button);else if(button.dataset.play==='jump')startJumpPlay(button)}));
 
-  function commandReact(kind,duration,message,effect='none'){
-    clearActivityTimers();clearActivityClasses();window.clearTimeout(commandTimer);stopThrow();clearReactionClasses();els.slime.classList.remove(...commandKinds);void els.slime.offsetWidth;els.slime.classList.add(kind);shadowAction(kind.replace('cmd-',''),duration);
-    if(effect==='impact')window.setTimeout(impactFlash,720);
-    else if(effect==='sparkle')window.setTimeout(()=>particles('✦',1,'command-peace'),420);
-    else if(effect==='dust'){window.setTimeout(()=>groundPuff(3,false),550);window.setTimeout(()=>groundPuff(2,false),1050);window.setTimeout(()=>groundPuff(2,false),2150)}
-    else if(effect==='music'){[420,1320,2320].forEach(delay=>window.setTimeout(()=>particles('♪',1,'play-note'),delay))}
-    commit(message);commandTimer=window.setTimeout(()=>{els.slime.classList.remove(...commandKinds);els.slime.classList.add('idle')},duration);
-  }
-  document.querySelectorAll('[data-interact]').forEach(button=>button.addEventListener('click',()=>{
-    selectOption(button);const kind=button.dataset.interact;state.happiness+=3;
-    if(kind==='highfive')commandReact('cmd-highfive',1800,`${state.name} jumps toward you for a high five!`,'impact');
-    else if(kind==='peace')commandReact('cmd-peace',2100,`${state.name} strikes a little peace pose.`,'sparkle');
-    else if(kind==='wave')commandReact('cmd-wave',3000,`${state.name} waves while backing away, then comes back.`);
-    else if(kind==='hide'){const side=Math.random()<.5?'cmd-hide-left':'cmd-hide-right';commandReact(side,3000,`${state.name} hides at the side and peeks back at you.`)}
-    else if(kind==='dig')commandReact('cmd-dig',3000,`${state.name} digs downward and peeks out from the ground.`,'dust');
-    else if(kind==='dance')commandReact('cmd-dance',3300,`${state.name} does a happy little dance!`,'music');
-  }));
+  function commandReact(kind,duration,message,effect='none'){clearActivityTimers();clearActivityClasses();window.clearTimeout(commandTimer);stopThrow();clearReactionClasses();els.slime.classList.remove(...commandKinds);void els.slime.offsetWidth;els.slime.classList.add(kind);shadowAction(kind.replace('cmd-',''),duration);if(effect==='impact')window.setTimeout(impactFlash,720);else if(effect==='sparkle')window.setTimeout(()=>particles('✦',1,'command-peace'),420);else if(effect==='dust'){window.setTimeout(()=>groundPuff(3,false),550);window.setTimeout(()=>groundPuff(2,false),1050);window.setTimeout(()=>groundPuff(2,false),2150)}else if(effect==='music'){[420,1320,2320].forEach(delay=>window.setTimeout(()=>particles('♪',1,'play-note'),delay))}commit(message);commandTimer=window.setTimeout(()=>{els.slime.classList.remove(...commandKinds);els.slime.classList.add('idle')},duration)}
+  document.querySelectorAll('[data-interact]').forEach(button=>button.addEventListener('click',()=>{selectOption(button);const kind=button.dataset.interact;state.happiness+=3;if(kind==='highfive')commandReact('cmd-highfive',1800,`${state.name} jumps toward you for a high five!`,'impact');else if(kind==='peace')commandReact('cmd-peace',2100,`${state.name} strikes a little peace pose.`,'sparkle');else if(kind==='wave')commandReact('cmd-wave',3000,`${state.name} waves while backing away, then comes back.`);else if(kind==='hide'){const side=Math.random()<.5?'cmd-hide-left':'cmd-hide-right';commandReact(side,3000,`${state.name} hides at the side and peeks back at you.`)}else if(kind==='dig')commandReact('cmd-dig',3000,`${state.name} digs downward and peeks out from the ground.`,'dust');else if(kind==='dance')commandReact('cmd-dance',3300,`${state.name} does a happy little dance!`,'music')}));
 
   function repeatParticles(symbol,count,cssClass,repeats,gap){let n=0;const tick=()=>{particles(symbol,count,cssClass);n+=1;if(n<repeats)window.setTimeout(tick,gap)};tick()}
   function startTV(button){clearActivityTimers();clearActivityClasses();selectOption(button);state.energy+=8;state.happiness+=5;state.fullness-=1;setToy('home-tv',5600);react('pet-react',1200,'pet-face');shadowAction('tv',5600);commit(`${state.name} settles down beside the TV for a proper rest.`)}
-  function startGame(button){clearActivityTimers();clearActivityClasses();selectOption(button);state.happiness+=8;state.energy-=3;state.fullness-=1;setToy('home-game',5800);stopThrow();clearReactionClasses();els.slime.classList.add('game-face');shadowAction('game',5800);window.setTimeout(()=>{els.toy.classList.add('game-flash');window.setTimeout(()=>els.toy.classList.remove('game-flash'),650)},850);commit(`${state.name} settles in for a little gaming session.`);activityTimer=window.setTimeout(()=>{els.slime.classList.remove('game-face');els.slime.classList.add('idle')},5800)}
+  function startGame(button){clearActivityTimers();clearActivityClasses();selectOption(button);state.happiness+=8;state.energy-=3;state.fullness-=1;setToy('home-game',5800);stopThrow();clearReactionClasses();els.slime.classList.add('game-face');shadowAction('game',5800);window.setTimeout(()=>{els.toy.classList.add('game-flash');window.setTimeout(()=>els.toy.classList.remove('game-flash'),700)},850);commit(`${state.name} grabs the controller for a little gaming session.`);activityTimer=window.setTimeout(()=>{els.slime.classList.remove('game-face');els.slime.classList.add('idle')},5800)}
   function startShower(button){clearActivityTimers();clearActivityClasses();selectOption(button);state.energy+=5;state.happiness+=5;setToy('home-shower',4800);react('pet-react',1050,'pet-face');shadowAction('shower',4800);repeatParticles('|',4,'shower-drop',5,650);commit(`${state.name} stands under the shower and gets properly rinsed.`)}
   function startBed(button){selectOption(button);if(state.energy>=97){react('tap-react',420);commit(`${state.name} is too awake for bed.`);return}clearActivityTimers();clearActivityClasses();stopThrow();clearReactionClasses();state.energy+=22;state.fullness-=3;setToy('home-bed',8400);els.sleepFx.classList.add('long-rest');replayFx(els.sleepFx,'show',6800);els.slime.classList.add('bed-sleeping');shadowAction('bed',8400);commit(`${state.name} settles on top of the bed... zzz.`);wakeTimer=window.setTimeout(()=>{els.slime.classList.remove('bed-sleeping');els.slime.classList.add('idle');els.sleepFx.classList.remove('show','long-rest');render(`${state.name} wakes up feeling refreshed.`)},6800);activityTimer=window.setTimeout(()=>els.toy.classList.remove('show'),8400)}
   document.querySelectorAll('[data-home]').forEach(button=>button.addEventListener('click',()=>{if(button.dataset.home==='tv')startTV(button);else if(button.dataset.home==='game')startGame(button);else if(button.dataset.home==='shower')startShower(button);else if(button.dataset.home==='bed')startBed(button)}));
