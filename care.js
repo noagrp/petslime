@@ -44,15 +44,14 @@
     button.classList.add('active');
   }
 
-  function setToy(kind, symbol = '', duration = 3200) {
+  function setToy(kind, duration = 3200) {
     els.toy.classList.remove('show', ...toyKinds);
     els.toy.classList.add('emoji-toy', kind);
-    els.toy.textContent = symbol;
+    els.toy.textContent = '';
     void els.toy.offsetWidth;
     replayFx(els.toy, 'show', duration);
   }
 
-  /* FOOD: intentionally kept as the approved current behaviour. */
   const foodInfo = {
     '🍓': ['strawberry', '•', 'food-crumb'],
     '🍏': ['green apple', '●', 'apple-bit'],
@@ -83,43 +82,42 @@
     button.addEventListener('click', () => eat(button.dataset.food, button));
   });
 
-  /* PLAY: each choice occupies a different part of the playground and lasts longer. */
   const playInfo = {
     yarn: {
-      symbol: '●', toyClass: 'play-yarn', duration: 3600,
-      reaction: () => react('play-react', 1350),
-      particle: ['·', 4, 'play-note'],
-      message: name => `${name} scurries after the yarn rolling along the ground!`
+      toyClass: 'play-yarn', duration: 4400,
+      reaction: () => react('play-react', 1600),
+      particle: ['·', 5, 'ball-pop'],
+      message: name => `${name} chases the yarn as it rolls back and forth on the ground!`
     },
     ball: {
-      symbol: '●', toyClass: 'play-ball', duration: 3600,
-      reaction: () => react('double-react', 850),
-      particle: ['•', 4, 'ball-pop'],
-      message: name => `${name} follows the ball as it bounces across the floor!`
+      toyClass: 'play-ball', duration: 4400,
+      reaction: () => react('double-react', 950),
+      particle: ['•', 5, 'ball-pop'],
+      message: name => `${name} follows the ball through a series of big bounces!`
     },
     bubble: {
-      symbol: '○', toyClass: 'play-bubble', duration: 4000,
-      reaction: () => react('tap-react', 580),
-      particle: ['○', 7, 'bubble-pop'],
-      message: name => `${name} watches the bubbles float up and away.`
+      toyClass: 'play-bubble', duration: 5000,
+      reaction: () => react('tap-react', 650),
+      particle: ['○', 8, 'bubble-pop'],
+      message: name => `${name} watches a cluster of bubbles float high above its head.`
     },
     feather: {
-      symbol: '~', toyClass: 'play-feather', duration: 3900,
-      reaction: () => react('pet-react', 950, 'pet-face'),
-      particle: ['~', 5, 'feather-swish'],
-      message: name => `${name} sways under the feather drifting overhead.`
+      toyClass: 'play-feather', duration: 4800,
+      reaction: () => react('pet-react', 1100, 'pet-face'),
+      particle: ['·', 5, 'feather-swish'],
+      message: name => `${name} tracks the feather as it slowly drifts from side to side overhead.`
     },
     butterfly: {
-      symbol: '✦', toyClass: 'play-butterfly', duration: 4300,
-      reaction: () => react('double-react', 980),
+      toyClass: 'play-butterfly', duration: 5200,
+      reaction: () => react('double-react', 1100),
       particle: ['·', 6, 'butterfly-spark'],
-      message: name => `${name} looks up while the butterfly circles above its head!`
+      message: name => `${name} looks up while the butterfly loops around above it!`
     },
     chase: {
-      symbol: '•', toyClass: 'play-chase', duration: 3800,
-      reaction: () => react('play-react', 1500),
+      toyClass: 'play-chase', duration: 4600,
+      reaction: () => react('play-react', 1750),
       particle: ['•', 6, 'light-dot'],
-      message: name => `${name} darts after the little light around the playground!`
+      message: name => `${name} darts after the glowing light as it zips around the playground!`
     }
   };
 
@@ -135,9 +133,9 @@
     state.happiness += 12;
     state.energy -= 7;
     state.fullness -= 3;
-    setToy(info.toyClass, info.symbol, info.duration);
+    setToy(info.toyClass, info.duration);
     info.reaction();
-    window.setTimeout(() => particles(info.particle[0], info.particle[1], info.particle[2]), 420);
+    window.setTimeout(() => particles(info.particle[0], info.particle[1], info.particle[2]), 520);
     commit(info.message(state.name));
   }
 
@@ -145,7 +143,6 @@
     button.addEventListener('click', () => playChoice(button.dataset.play, button));
   });
 
-  /* INTERACT: these are commands/tricks. Direct petting, tapping, holding, dragging and tossing remain free gestures on the slime. */
   function commandReact(kind, duration, message, particle, count = 4, particleClass = '') {
     window.clearTimeout(commandTimer);
     stopThrow();
@@ -172,7 +169,7 @@
       } else if (kind === 'peace') {
         commandReact('cmd-peace', 2100, `${state.name} strikes a little peace pose.`, 'V', 3, 'command-peace');
       } else if (kind === 'wave') {
-        commandReact('cmd-wave', 2300, `${state.name} waves hello.`, '~', 4, 'command-wave');
+        commandReact('cmd-wave', 3000, `${state.name} waves while backing away, then comes back.`, '·', 4, 'command-wave');
       } else if (kind === 'hide') {
         const side = Math.random() < .5 ? 'cmd-hide-left' : 'cmd-hide-right';
         commandReact(side, 3000, `${state.name} hides at the side and peeks back at you.`, '·', 3, 'command-hide');
@@ -194,7 +191,6 @@
     tick();
   }
 
-  /* HOME: longer resting scenes. TV sits beside the slime, shower is overhead, bed is underneath the slime. */
   function homeAction(kind, button) {
     selectOption(button);
 
@@ -202,14 +198,14 @@
       state.energy += 8;
       state.happiness += 5;
       state.fullness -= 1;
-      setToy('home-tv', '', 5200);
+      setToy('home-tv', 5200);
       react('pet-react', 1200, 'pet-face');
       repeatParticles('·', 2, 'tv-note', 4, 900);
       commit(`${state.name} settles down beside the TV for a proper rest.`);
     } else if (kind === 'shower') {
       state.energy += 5;
       state.happiness += 5;
-      setToy('home-shower', '', 4800);
+      setToy('home-shower', 4800);
       react('pet-react', 1050, 'pet-face');
       repeatParticles('|', 5, 'shower-drop', 5, 650);
       commit(`${state.name} stands under the shower and gets properly rinsed.`);
@@ -221,7 +217,7 @@
       }
       state.energy += 22;
       state.fullness -= 3;
-      setToy('home-bed', '', 6200);
+      setToy('home-bed', 6200);
       els.sleepFx.classList.add('long-rest');
       replayFx(els.sleepFx, 'show', 6000);
       react('rest-react', 5000);
