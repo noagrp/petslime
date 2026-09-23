@@ -21,6 +21,12 @@
     button.addEventListener('click', closeCare);
   });
 
+  if (els.settingsToggle) {
+    els.settingsToggle.addEventListener('click', () => {
+      if (els.settingsToggle.getAttribute('aria-expanded') === 'true') closeCare();
+    });
+  }
+
   function eat(symbol, label) {
     if (state.fullness >= 96) {
       react('tap-react', 420);
@@ -47,12 +53,12 @@
   });
 
   const playInfo = {
-    yarn: ['🧶', '♪', `${state.name} chases the yarn!`],
-    ball: ['⚽', '●', `${state.name} bounces after the ball!`],
-    bubble: ['🫧', '○', `${state.name} tries to catch the bubbles!`],
-    feather: ['🪶', '〰', `${state.name} follows the feather!`],
-    butterfly: ['🦋', '✦', `${state.name} hops after the butterfly!`],
-    chase: ['🔵', '•', `${state.name} chases the little light!`]
+    yarn: ['🧶', '♪', name => `${name} chases the yarn!`],
+    ball: ['⚽', '●', name => `${name} bounces after the ball!`],
+    bubble: ['🫧', '○', name => `${name} tries to catch the bubbles!`],
+    feather: ['🪶', '〰', name => `${name} follows the feather!`],
+    butterfly: ['🦋', '✦', name => `${name} hops after the butterfly!`],
+    chase: ['🔵', '•', name => `${name} chases the little light!`]
   };
 
   function playChoice(kind) {
@@ -71,7 +77,7 @@
     replayFx(els.toy, 'show', 1300);
     react('play-react', 1250);
     window.setTimeout(() => particles(info[1], 5, 'play-note'), 420);
-    commit(info[2].replace(/^Mochi/, state.name));
+    commit(info[2](state.name));
     window.setTimeout(closeCare, 760);
   }
 
