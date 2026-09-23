@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#dff6e8">
   <meta name="description" content="A tiny interactive slime pet that lives in your browser.">
   <title>Pet Slime</title>
-  <link rel="stylesheet" href="styles.css?v=20260923-8">
+  <link rel="stylesheet" href="styles.css?v=20260923-9">
   <style>
     .panel {
       background: rgba(255,255,255,.44) !important;
@@ -16,24 +16,13 @@
       -webkit-backdrop-filter: blur(14px) saturate(1.08) !important;
     }
 
-    .play-panel,.stage { min-height: 360px; height: 360px; }
+    .play-panel,.stage { min-height:360px; height:360px; }
 
     .care-sheet {
-      position:absolute;
-      left:10px;
-      top:50%;
-      z-index:26;
-      width:90px;
-      padding:7px;
-      border:1px solid rgba(255,255,255,.58);
-      border-radius:18px;
-      background:rgba(255,255,255,.38);
-      box-shadow:0 10px 28px rgba(52,94,74,.10);
-      backdrop-filter:blur(14px);
-      -webkit-backdrop-filter:blur(14px);
-      transform:translate(-118%,-50%) scale(.9);
-      opacity:0;
-      pointer-events:none;
+      position:absolute; left:10px; top:50%; z-index:26; width:90px; padding:7px;
+      border:1px solid rgba(255,255,255,.58); border-radius:18px; background:rgba(255,255,255,.38);
+      box-shadow:0 10px 28px rgba(52,94,74,.10); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+      transform:translate(-118%,-50%) scale(.9); opacity:0; pointer-events:none;
       transition:transform .2s ease,opacity .16s ease;
     }
     .care-sheet.open { transform:translate(0,-50%) scale(1); opacity:1; pointer-events:auto; }
@@ -47,8 +36,24 @@
     .care-option:hover { transform:translateY(-1px); }
     .care-option:active { transform:scale(.93); }
     .care-option.active { background:rgba(255,255,255,.96); box-shadow:0 0 0 3px rgba(91,176,131,.16),0 6px 15px rgba(52,94,74,.11); }
-    .care-option span:first-child { font-size:1.22rem; line-height:1; }
     .care-option span:last-child { display:none; }
+
+    .play-mini { position:relative; display:block; width:22px; height:22px; }
+    .yarn-mini { border-radius:50%; background:#b77bc0; box-shadow:inset -3px -3px 0 rgba(88,47,94,.16); }
+    .yarn-mini::before,.yarn-mini::after { content:""; position:absolute; border:2px solid rgba(255,255,255,.65); border-radius:50%; }
+    .yarn-mini::before { inset:5px 3px; transform:rotate(28deg); }
+    .yarn-mini::after { width:8px; height:2px; border-width:0 0 2px 0; right:-5px; bottom:1px; border-radius:0; transform:rotate(18deg); }
+    .ball-mini { border-radius:50%; background:#f8f8f8; border:2px solid #4f6470; }
+    .ball-mini::before { content:""; position:absolute; width:7px; height:7px; border-radius:50%; background:#4f6470; left:6px; top:6px; box-shadow:-6px 4px 0 -2px #4f6470,6px 4px 0 -2px #4f6470; }
+    .bubbles-mini::before,.bubbles-mini::after { content:""; position:absolute; border:2px solid #72b7ca; border-radius:50%; }
+    .bubbles-mini::before { width:12px; height:12px; left:1px; top:7px; }
+    .bubbles-mini::after { width:8px; height:8px; right:0; top:1px; box-shadow:-1px 13px 0 -2px rgba(114,183,202,.85); }
+    .feather-mini { width:10px; height:22px; border-radius:80% 10% 80% 10%; background:#d7c29b; transform:rotate(28deg); }
+    .feather-mini::after { content:""; position:absolute; left:4px; top:1px; width:2px; height:22px; background:#8f775c; transform:rotate(-5deg); }
+    .butterfly-mini::before,.butterfly-mini::after { content:""; position:absolute; top:4px; width:10px; height:14px; background:#b884cf; border-radius:70% 30% 70% 30%; }
+    .butterfly-mini::before { left:1px; transform:rotate(-24deg); }
+    .butterfly-mini::after { right:1px; transform:scaleX(-1) rotate(-24deg); }
+    .light-mini { width:14px; height:14px; margin:4px; border-radius:50%; background:#79b7ff; box-shadow:0 0 8px #79b7ff,0 0 14px rgba(121,183,255,.8); }
 
     .floating-settings { position:absolute; right:12px; top:12px; z-index:40; pointer-events:auto; touch-action:manipulation; }
     .floating-settings .settings-toggle { position:relative; width:34px; height:34px; margin:0 0 0 auto; pointer-events:auto; touch-action:manipulation; font-size:1.15rem; background:rgba(255,255,255,.72); box-shadow:0 6px 18px rgba(46,91,69,.12); }
@@ -76,200 +81,152 @@
     .particle.command-hide { color:#587064; }
     .particle.command-dust { color:#a58a67; }
 
-    .toy.emoji-toy {
-      display:grid; place-items:center; width:42px; height:42px; margin:0; background:none; box-shadow:none;
-      font-size:1.9rem; line-height:1; opacity:0; pointer-events:none;
-      filter:drop-shadow(0 5px 5px rgba(44,69,57,.12));
-    }
+    .toy.emoji-toy { display:block; width:52px; height:52px; margin:0; background:none; box-shadow:none; opacity:0; pointer-events:none; filter:drop-shadow(0 5px 5px rgba(44,69,57,.12)); }
     .toy.emoji-toy.show { opacity:1; }
 
-    .toy.play-yarn { left:50%; bottom:54px; color:#9d6caf; font-size:2rem; }
-    .toy.play-yarn.show { animation:yarnGround 3.6s ease-in-out both; }
-    .toy.play-ball { left:50%; bottom:52px; color:#507ca8; font-size:2.15rem; }
-    .toy.play-ball.show { animation:ballGround 3.6s cubic-bezier(.22,.72,.35,1) both; }
-    .toy.play-bubble { left:50%; bottom:86px; color:#78b7c8; font-size:2.35rem; }
-    .toy.play-bubble.show { animation:bubbleFloat 4s ease-out both; }
-    .toy.play-feather { left:50%; bottom:165px; color:#9f8466; font-size:2rem; }
-    .toy.play-feather.show { animation:featherDrift 3.9s ease-in-out both; }
-    .toy.play-butterfly { left:50%; bottom:168px; color:#a76fbd; font-size:2.2rem; }
-    .toy.play-butterfly.show { animation:butterflyFlight 4.3s ease-in-out both; }
-    .toy.play-chase { left:50%; bottom:125px; color:#4b86d1; font-size:2.2rem; text-shadow:0 0 9px rgba(75,134,209,.55); }
-    .toy.play-chase.show { animation:lightChase 3.8s linear both; }
+    .toy.play-yarn { left:50%; bottom:54px; width:48px; height:48px; border-radius:50%; background:#b77bc0; box-shadow:inset -7px -7px 0 rgba(88,47,94,.16),0 6px 12px rgba(72,64,76,.13); }
+    .toy.play-yarn::before,.toy.play-yarn::after { content:""; position:absolute; border:3px solid rgba(255,255,255,.62); border-radius:50%; }
+    .toy.play-yarn::before { inset:10px 6px; transform:rotate(28deg); }
+    .toy.play-yarn::after { width:20px; height:3px; border-width:0 0 3px 0; right:-14px; bottom:3px; border-radius:0; transform:rotate(18deg); }
+    .toy.play-yarn.show { animation:yarnGround 4.4s ease-in-out both; }
+
+    .toy.play-ball { left:50%; bottom:50px; width:46px; height:46px; border-radius:50%; background:#fff; border:4px solid #4f6470; }
+    .toy.play-ball::before { content:""; position:absolute; width:12px; height:12px; border-radius:50%; background:#4f6470; left:13px; top:13px; box-shadow:-12px 8px 0 -3px #4f6470,12px 8px 0 -3px #4f6470,0 -13px 0 -4px #4f6470; }
+    .toy.play-ball.show { animation:ballGround 4.4s cubic-bezier(.22,.72,.35,1) both; }
+
+    .toy.play-bubble { left:50%; bottom:88px; width:64px; height:64px; }
+    .toy.play-bubble::before,.toy.play-bubble::after { content:""; position:absolute; border:3px solid #72b7ca; border-radius:50%; background:rgba(213,245,255,.18); }
+    .toy.play-bubble::before { width:32px; height:32px; left:2px; bottom:0; box-shadow:26px -25px 0 -6px rgba(213,245,255,.16),26px -25px 0 -3px #72b7ca; }
+    .toy.play-bubble::after { width:20px; height:20px; right:0; bottom:5px; }
+    .toy.play-bubble.show { animation:bubbleFloat 5s ease-out both; }
+
+    .toy.play-feather { left:50%; bottom:166px; width:24px; height:62px; border-radius:90% 10% 90% 10%; background:linear-gradient(90deg,#e2d1ad,#b99d77); transform-origin:center; }
+    .toy.play-feather::after { content:""; position:absolute; left:11px; top:2px; width:3px; height:66px; background:#836c51; transform:rotate(-4deg); }
+    .toy.play-feather.show { animation:featherDrift 4.8s ease-in-out both; }
+
+    .toy.play-butterfly { left:50%; bottom:170px; width:54px; height:42px; }
+    .toy.play-butterfly::before,.toy.play-butterfly::after { content:""; position:absolute; top:2px; width:25px; height:35px; background:linear-gradient(#c99be0,#9f6fbd); border-radius:75% 25% 70% 30%; }
+    .toy.play-butterfly::before { left:0; transform:rotate(-22deg); }
+    .toy.play-butterfly::after { right:0; transform:scaleX(-1) rotate(-22deg); }
+    .toy.play-butterfly.show { animation:butterflyFlight 5.2s ease-in-out both; }
+
+    .toy.play-chase { left:50%; bottom:125px; width:28px; height:28px; border-radius:50%; background:#75b8ff; box-shadow:0 0 14px #75b8ff,0 0 28px rgba(117,184,255,.8); }
+    .toy.play-chase.show { animation:lightChase 4.6s linear both; }
 
     @keyframes yarnGround {
-      0% { opacity:0; transform:translate(120px,7px) rotate(0) scale(.55); }
-      10% { opacity:1; }
-      28% { transform:translate(62px,2px) rotate(-130deg) scale(1); }
-      48% { transform:translate(-42px,6px) rotate(-300deg) scale(.92); }
-      68% { transform:translate(18px,1px) rotate(-470deg) scale(1.05); }
-      86% { opacity:1; transform:translate(78px,6px) rotate(-620deg) scale(.9); }
-      100% { opacity:0; transform:translate(118px,8px) rotate(-720deg) scale(.65); }
+      0% { opacity:0; transform:translate(125px,5px) rotate(0) scale(.7); }
+      8% { opacity:1; }
+      25% { transform:translate(55px,3px) rotate(-170deg) scale(1); }
+      48% { transform:translate(-65px,6px) rotate(-370deg) scale(.96); }
+      70% { transform:translate(20px,2px) rotate(-560deg) scale(1.06); }
+      90% { opacity:1; transform:translate(92px,6px) rotate(-760deg) scale(.92); }
+      100% { opacity:0; transform:translate(128px,8px) rotate(-830deg) scale(.72); }
     }
     @keyframes ballGround {
-      0% { opacity:0; transform:translate(-120px,0) scale(.55); }
-      8% { opacity:1; }
-      20% { transform:translate(-76px,-64px) rotate(90deg); }
-      34% { transform:translate(-35px,2px) rotate(180deg) scale(1.12,.88); }
-      48% { transform:translate(5px,-52px) rotate(260deg); }
-      62% { transform:translate(44px,2px) rotate(340deg) scale(1.08,.9); }
-      76% { transform:translate(78px,-36px) rotate(420deg); }
-      90% { opacity:1; transform:translate(105px,2px) rotate(500deg) scale(1.05,.92); }
-      100% { opacity:0; transform:translate(128px,-14px) rotate(560deg) scale(.7); }
+      0% { opacity:0; transform:translate(-128px,0) scale(.65); }
+      7% { opacity:1; }
+      19% { transform:translate(-84px,-82px) rotate(100deg); }
+      34% { transform:translate(-38px,2px) rotate(190deg) scale(1.15,.86); }
+      49% { transform:translate(8px,-68px) rotate(285deg); }
+      64% { transform:translate(48px,2px) rotate(375deg) scale(1.12,.88); }
+      79% { transform:translate(82px,-46px) rotate(455deg); }
+      92% { opacity:1; transform:translate(110px,2px) rotate(535deg) scale(1.08,.9); }
+      100% { opacity:0; transform:translate(132px,-18px) rotate(590deg) scale(.72); }
     }
     @keyframes bubbleFloat {
-      0% { opacity:0; transform:translate(20px,48px) scale(.35); }
-      12% { opacity:1; }
-      30% { transform:translate(-36px,5px) scale(.75); }
-      48% { transform:translate(30px,-48px) scale(1); }
-      66% { transform:translate(-24px,-92px) scale(1.18); }
-      84% { opacity:1; transform:translate(24px,-132px) scale(1.34); }
-      100% { opacity:0; transform:translate(-10px,-175px) scale(1.55); }
+      0% { opacity:0; transform:translate(0,55px) scale(.45); }
+      10% { opacity:1; }
+      28% { transform:translate(-46px,4px) scale(.78); }
+      48% { transform:translate(38px,-54px) scale(1); }
+      66% { transform:translate(-30px,-112px) scale(1.15); }
+      84% { opacity:1; transform:translate(28px,-160px) scale(1.28); }
+      100% { opacity:0; transform:translate(-16px,-215px) scale(1.48); }
     }
     @keyframes featherDrift {
-      0% { opacity:0; transform:translate(90px,-10px) rotate(20deg) scale(.65); }
+      0% { opacity:0; transform:translate(105px,-18px) rotate(24deg) scale(.72); }
       10% { opacity:1; }
-      28% { transform:translate(28px,-34px) rotate(-22deg); }
-      46% { transform:translate(-54px,-12px) rotate(19deg); }
-      64% { transform:translate(12px,10px) rotate(-28deg); }
-      82% { opacity:1; transform:translate(-34px,34px) rotate(24deg); }
-      100% { opacity:0; transform:translate(48px,62px) rotate(-18deg) scale(.72); }
+      26% { transform:translate(38px,-42px) rotate(-28deg); }
+      45% { transform:translate(-62px,-18px) rotate(24deg); }
+      64% { transform:translate(24px,10px) rotate(-32deg); }
+      83% { opacity:1; transform:translate(-44px,42px) rotate(27deg); }
+      100% { opacity:0; transform:translate(54px,80px) rotate(-21deg) scale(.8); }
     }
     @keyframes butterflyFlight {
-      0% { opacity:0; transform:translate(-90px,18px) rotate(-7deg) scale(.55); }
-      10% { opacity:1; }
-      24% { transform:translate(-34px,-38px) rotate(8deg) scale(.95); }
-      40% { transform:translate(42px,-18px) rotate(-7deg) scale(1.08); }
-      56% { transform:translate(72px,-68px) rotate(9deg); }
-      72% { transform:translate(6px,-92px) rotate(-8deg) scale(1.12); }
-      86% { opacity:1; transform:translate(-58px,-58px) rotate(10deg); }
-      100% { opacity:0; transform:translate(-92px,-126px) rotate(-12deg) scale(.6); }
+      0% { opacity:0; transform:translate(-100px,20px) scale(.6) rotate(-8deg); }
+      9% { opacity:1; }
+      23% { transform:translate(-35px,-42px) scale(.92) rotate(8deg); }
+      39% { transform:translate(48px,-12px) scale(1.08) rotate(-7deg); }
+      55% { transform:translate(82px,-78px) scale(.98) rotate(9deg); }
+      70% { transform:translate(4px,-104px) scale(1.13) rotate(-8deg); }
+      85% { opacity:1; transform:translate(-72px,-62px) scale(.96) rotate(10deg); }
+      100% { opacity:0; transform:translate(-106px,-142px) scale(.62) rotate(-12deg); }
     }
     @keyframes lightChase {
-      0% { opacity:0; transform:translate(-115px,58px) scale(.6); }
-      8% { opacity:1; }
-      20% { transform:translate(-50px,-48px) scale(1); }
-      34% { transform:translate(90px,-10px) scale(.72); }
-      48% { transform:translate(26px,62px) scale(1.12); }
-      62% { transform:translate(-85px,8px) scale(.78); }
-      76% { transform:translate(58px,-68px) scale(1.08); }
-      90% { opacity:1; transform:translate(98px,34px) scale(.76); }
-      100% { opacity:0; transform:translate(126px,-12px) scale(.5); }
+      0% { opacity:0; transform:translate(-122px,62px) scale(.55); }
+      7% { opacity:1; }
+      20% { transform:translate(-56px,-58px) scale(1); }
+      34% { transform:translate(96px,-12px) scale(.72); }
+      48% { transform:translate(30px,68px) scale(1.1); }
+      62% { transform:translate(-94px,10px) scale(.78); }
+      76% { transform:translate(66px,-78px) scale(1.08); }
+      90% { opacity:1; transform:translate(104px,38px) scale(.72); }
+      100% { opacity:0; transform:translate(132px,-16px) scale(.5); }
     }
 
     .toy.home-tv,.toy.home-shower,.toy.home-bed { color:transparent; filter:none; }
-
     .toy.home-tv { left:50%; bottom:50px; width:92px; height:72px; z-index:3; }
-    .toy.home-tv::before {
-      content:""; position:absolute; inset:0 5px 10px; border-radius:10px; border:5px solid #4e5a57;
-      background:linear-gradient(145deg,#bfe2ee,#8fb9cd 55%,#dce8e5); box-shadow:0 8px 18px rgba(50,69,62,.18);
-    }
-    .toy.home-tv::after {
-      content:""; position:absolute; left:31px; bottom:0; width:30px; height:10px; border-radius:4px 4px 2px 2px; background:#59635f;
-    }
+    .toy.home-tv::before { content:""; position:absolute; inset:0 5px 10px; border-radius:10px; border:5px solid #4e5a57; background:linear-gradient(145deg,#bfe2ee,#8fb9cd 55%,#dce8e5); box-shadow:0 8px 18px rgba(50,69,62,.18); }
+    .toy.home-tv::after { content:""; position:absolute; left:31px; bottom:0; width:30px; height:10px; border-radius:4px 4px 2px 2px; background:#59635f; }
     .toy.home-tv.show { animation:tvRest 5.2s ease both; }
-    @keyframes tvRest {
-      0% { opacity:0; transform:translate(125px,8px) scale(.7); }
-      12%,88% { opacity:1; transform:translate(96px,0) scale(1); }
-      100% { opacity:0; transform:translate(96px,0) scale(.92); }
-    }
+    @keyframes tvRest { 0% { opacity:0; transform:translate(125px,8px) scale(.7); } 12%,88% { opacity:1; transform:translate(96px,0) scale(1); } 100% { opacity:0; transform:translate(96px,0) scale(.92); } }
 
     .toy.home-shower { left:50%; bottom:206px; width:88px; height:54px; z-index:7; }
-    .toy.home-shower::before {
-      content:""; position:absolute; left:22px; top:8px; width:52px; height:18px; border-radius:14px 14px 7px 7px;
-      background:#728b95; box-shadow:inset 0 -5px 0 rgba(55,78,86,.18),0 6px 12px rgba(45,67,72,.15);
-      transform:rotate(8deg);
-    }
-    .toy.home-shower::after {
-      content:""; position:absolute; left:54px; top:-3px; width:8px; height:24px; border-radius:8px; background:#728b95;
-    }
+    .toy.home-shower::before { content:""; position:absolute; left:22px; top:8px; width:52px; height:18px; border-radius:14px 14px 7px 7px; background:#728b95; box-shadow:inset 0 -5px 0 rgba(55,78,86,.18),0 6px 12px rgba(45,67,72,.15); transform:rotate(8deg); }
+    .toy.home-shower::after { content:""; position:absolute; left:54px; top:-3px; width:8px; height:24px; border-radius:8px; background:#728b95; }
     .toy.home-shower.show { animation:showerHover 4.8s ease both; }
-    @keyframes showerHover {
-      0% { opacity:0; transform:translate(10px,-22px) scale(.78); }
-      12%,88% { opacity:1; transform:translate(10px,0) scale(1); }
-      100% { opacity:0; transform:translate(10px,5px) scale(.9); }
-    }
+    @keyframes showerHover { 0% { opacity:0; transform:translate(10px,-22px) scale(.78); } 12%,88% { opacity:1; transform:translate(10px,0) scale(1); } 100% { opacity:0; transform:translate(10px,5px) scale(.9); } }
 
     .toy.home-bed { left:50%; bottom:24px; width:210px; height:74px; z-index:2; }
-    .toy.home-bed::before {
-      content:""; position:absolute; left:-105px; bottom:0; width:210px; height:48px; border-radius:18px 18px 13px 13px;
-      background:linear-gradient(#d6d1ec,#bbb3dc); border:4px solid rgba(95,86,135,.16); box-shadow:0 10px 18px rgba(62,63,88,.15);
-    }
-    .toy.home-bed::after {
-      content:""; position:absolute; left:-91px; bottom:35px; width:70px; height:30px; border-radius:16px;
-      background:#f5f1fb; box-shadow:0 3px 8px rgba(80,73,105,.09);
-    }
+    .toy.home-bed::before { content:""; position:absolute; left:-105px; bottom:0; width:210px; height:48px; border-radius:18px 18px 13px 13px; background:linear-gradient(#d6d1ec,#bbb3dc); border:4px solid rgba(95,86,135,.16); box-shadow:0 10px 18px rgba(62,63,88,.15); }
+    .toy.home-bed::after { content:""; position:absolute; left:-91px; bottom:35px; width:70px; height:30px; border-radius:16px; background:#f5f1fb; box-shadow:0 3px 8px rgba(80,73,105,.09); }
     .toy.home-bed.show { animation:bedSlide 6.2s ease both; }
-    @keyframes bedSlide {
-      0% { opacity:0; transform:translateX(-80px) scale(.82); }
-      12%,90% { opacity:1; transform:translateX(0) scale(1); }
-      100% { opacity:0; transform:translateX(0) scale(.95); }
-    }
+    @keyframes bedSlide { 0% { opacity:0; transform:translateX(-80px) scale(.82); } 12%,90% { opacity:1; transform:translateX(0) scale(1); } 100% { opacity:0; transform:translateX(0) scale(.95); } }
     .sleep-fx.long-rest.show { animation:zzz 5.7s ease both; }
 
     .slime.cmd-highfive { animation:cmdHighFive 1.8s cubic-bezier(.2,.78,.25,1) both; z-index:12; }
-    @keyframes cmdHighFive {
-      0%,100% { transform:translate3d(var(--x),var(--y),0) scale(1); }
-      18% { transform:translate3d(var(--x),calc(var(--y) + 12px),0) scale(1.12,.76); }
-      48% { transform:translate3d(var(--x),calc(var(--y) - 72px),0) scale(1.58); filter:brightness(1.04); }
-      60% { transform:translate3d(var(--x),calc(var(--y) - 62px),0) scale(1.5); }
-      82% { transform:translate3d(var(--x),calc(var(--y) + 4px),0) scale(1.13,.82); }
-    }
+    @keyframes cmdHighFive { 0%,100% { transform:translate3d(var(--x),var(--y),0) scale(1); } 18% { transform:translate3d(var(--x),calc(var(--y) + 12px),0) scale(1.12,.76); } 48% { transform:translate3d(var(--x),calc(var(--y) - 72px),0) scale(1.58); filter:brightness(1.04); } 60% { transform:translate3d(var(--x),calc(var(--y) - 62px),0) scale(1.5); } 82% { transform:translate3d(var(--x),calc(var(--y) + 4px),0) scale(1.13,.82); } }
     .slime.cmd-peace { animation:cmdPeace 2.1s ease both; }
-    @keyframes cmdPeace {
-      0%,100% { transform:translate3d(var(--x),var(--y),0); }
-      25% { transform:translate3d(calc(var(--x) - 8px),calc(var(--y) - 10px),0) rotate(-5deg); }
-      55% { transform:translate3d(calc(var(--x) + 8px),calc(var(--y) - 15px),0) rotate(5deg) scale(1.04); }
-      80% { transform:translate3d(var(--x),calc(var(--y) - 6px),0); }
-    }
+    @keyframes cmdPeace { 0%,100% { transform:translate3d(var(--x),var(--y),0); } 25% { transform:translate3d(calc(var(--x) - 8px),calc(var(--y) - 10px),0) rotate(-5deg); } 55% { transform:translate3d(calc(var(--x) + 8px),calc(var(--y) - 15px),0) rotate(5deg) scale(1.04); } 80% { transform:translate3d(var(--x),calc(var(--y) - 6px),0); } }
     .slime.cmd-peace .eye { height:5px; top:66px; box-shadow:none; }
-    .slime.cmd-wave { animation:cmdWave 2.3s ease-in-out both; }
+
+    .slime.cmd-wave { animation:cmdWave 3s ease-in-out both; }
     @keyframes cmdWave {
-      0%,100% { transform:translate3d(var(--x),var(--y),0) rotate(0); }
-      20% { transform:translate3d(var(--x),calc(var(--y) - 7px),0) rotate(-9deg); }
-      40% { transform:translate3d(var(--x),calc(var(--y) - 3px),0) rotate(10deg); }
-      60% { transform:translate3d(var(--x),calc(var(--y) - 7px),0) rotate(-9deg); }
-      80% { transform:translate3d(var(--x),calc(var(--y) - 3px),0) rotate(8deg); }
+      0%,100% { transform:translate3d(var(--x),var(--y),0) scale(1) rotate(0); filter:brightness(1); }
+      18% { transform:translate3d(calc(var(--x) - 4px),calc(var(--y) - 4px),0) scale(.82) rotate(-7deg); }
+      38% { transform:translate3d(calc(var(--x) + 4px),calc(var(--y) - 12px),0) scale(.6) rotate(7deg); }
+      56% { transform:translate3d(calc(var(--x) - 3px),calc(var(--y) - 20px),0) scale(.46) rotate(-6deg); filter:brightness(.94); }
+      70% { transform:translate3d(calc(var(--x) + 2px),calc(var(--y) - 18px),0) scale(.5) rotate(5deg); }
+      84% { transform:translate3d(var(--x),calc(var(--y) - 7px),0) scale(.78) rotate(-3deg); }
     }
+
     .slime.cmd-hide-left { animation:cmdHideLeft 3s ease both; }
     .slime.cmd-hide-right { animation:cmdHideRight 3s ease both; }
-    @keyframes cmdHideLeft {
-      0%,100% { transform:translate3d(var(--x),var(--y),0); }
-      25%,72% { transform:translate3d(calc(var(--x) - 185px),var(--y),0) rotate(-4deg); }
-      48% { transform:translate3d(calc(var(--x) - 168px),var(--y),0) rotate(4deg); }
-    }
-    @keyframes cmdHideRight {
-      0%,100% { transform:translate3d(var(--x),var(--y),0); }
-      25%,72% { transform:translate3d(calc(var(--x) + 185px),var(--y),0) rotate(4deg); }
-      48% { transform:translate3d(calc(var(--x) + 168px),var(--y),0) rotate(-4deg); }
-    }
+    @keyframes cmdHideLeft { 0%,100% { transform:translate3d(var(--x),var(--y),0); } 25%,72% { transform:translate3d(calc(var(--x) - 185px),var(--y),0) rotate(-4deg); } 48% { transform:translate3d(calc(var(--x) - 168px),var(--y),0) rotate(4deg); } }
+    @keyframes cmdHideRight { 0%,100% { transform:translate3d(var(--x),var(--y),0); } 25%,72% { transform:translate3d(calc(var(--x) + 185px),var(--y),0) rotate(4deg); } 48% { transform:translate3d(calc(var(--x) + 168px),var(--y),0) rotate(-4deg); } }
     .slime.cmd-dig { animation:cmdDig 3s ease both; }
-    @keyframes cmdDig {
-      0%,100% { transform:translate3d(var(--x),var(--y),0); }
-      24% { transform:translate3d(var(--x),calc(var(--y) + 45px),0) scale(1.08,.82); }
-      44%,70% { transform:translate3d(var(--x),calc(var(--y) + 116px),0) scale(.96); }
-      82% { transform:translate3d(var(--x),calc(var(--y) + 45px),0) scale(1.08,.82); }
-    }
+    @keyframes cmdDig { 0%,100% { transform:translate3d(var(--x),var(--y),0); } 24% { transform:translate3d(var(--x),calc(var(--y) + 45px),0) scale(1.08,.82); } 44%,70% { transform:translate3d(var(--x),calc(var(--y) + 116px),0) scale(.96); } 82% { transform:translate3d(var(--x),calc(var(--y) + 45px),0) scale(1.08,.82); } }
     .slime.cmd-dance { animation:cmdDance 3.3s ease-in-out both; }
-    @keyframes cmdDance {
-      0%,100% { transform:translate3d(var(--x),var(--y),0); }
-      12% { transform:translate3d(calc(var(--x) - 24px),calc(var(--y) - 18px),0) rotate(-10deg) scale(1.05); }
-      26% { transform:translate3d(calc(var(--x) + 24px),calc(var(--y) - 6px),0) rotate(10deg); }
-      40% { transform:translate3d(calc(var(--x) - 20px),calc(var(--y) - 25px),0) rotate(-8deg); }
-      54% { transform:translate3d(calc(var(--x) + 22px),calc(var(--y) - 8px),0) rotate(9deg); }
-      68% { transform:translate3d(calc(var(--x) - 15px),calc(var(--y) - 20px),0) rotate(-7deg); }
-      84% { transform:translate3d(calc(var(--x) + 12px),calc(var(--y) - 5px),0) rotate(6deg); }
-    }
+    @keyframes cmdDance { 0%,100% { transform:translate3d(var(--x),var(--y),0); } 12% { transform:translate3d(calc(var(--x) - 24px),calc(var(--y) - 18px),0) rotate(-10deg) scale(1.05); } 26% { transform:translate3d(calc(var(--x) + 24px),calc(var(--y) - 6px),0) rotate(10deg); } 40% { transform:translate3d(calc(var(--x) - 20px),calc(var(--y) - 25px),0) rotate(-8deg); } 54% { transform:translate3d(calc(var(--x) + 22px),calc(var(--y) - 8px),0) rotate(9deg); } 68% { transform:translate3d(calc(var(--x) - 15px),calc(var(--y) - 20px),0) rotate(-7deg); } 84% { transform:translate3d(calc(var(--x) + 12px),calc(var(--y) - 5px),0) rotate(6deg); } }
 
     @media (max-width:420px) {
       .play-panel,.stage { min-height:340px; height:340px; }
       .care-sheet { left:6px; width:84px; padding:6px; }
       .care-grid { grid-template-columns:repeat(2,32px); gap:6px; }
       .care-option { width:32px; height:32px; }
-      .care-option span:first-child { font-size:1.1rem; }
+      .play-mini { transform:scale(.9); }
       .floating-settings { right:8px; top:8px; }
       .floating-settings .settings-toggle { width:34px; height:34px; font-size:1.05rem; }
       .floating-settings .settings-menu { width:min(178px,62vw); top:42px; }
-      .toy.home-tv { transform-origin:center; }
       .toy.home-bed { width:190px; }
       .toy.home-bed::before { left:-95px; width:190px; }
     }
@@ -290,12 +247,7 @@
           <div id="toy" class="toy" aria-hidden="true"></div>
           <div id="food" class="food" aria-hidden="true">🍓</div>
           <div id="sleep-fx" class="sleep-fx" aria-hidden="true"><span>Z</span><span>z</span><span>z</span></div>
-          <div id="slime" class="slime" role="img" aria-label="A happy slime" tabindex="0">
-            <span class="shine" aria-hidden="true"></span>
-            <span class="eye eye-left" aria-hidden="true"></span>
-            <span class="eye eye-right" aria-hidden="true"></span>
-            <span class="mouth" aria-hidden="true"></span>
-          </div>
+          <div id="slime" class="slime" role="img" aria-label="A happy slime" tabindex="0"><span class="shine" aria-hidden="true"></span><span class="eye eye-left" aria-hidden="true"></span><span class="eye eye-right" aria-hidden="true"></span><span class="mouth" aria-hidden="true"></span></div>
           <span id="slime-shadow" class="slime-shadow" aria-hidden="true"></span>
         </div>
 
@@ -309,12 +261,12 @@
         </div></section>
 
         <section id="care-play" class="care-sheet" aria-label="Play choices"><div class="care-grid">
-          <button class="care-option" data-play="yarn" aria-label="Yarn" title="Yarn"><span>🧶</span><span>Yarn</span></button>
-          <button class="care-option" data-play="ball" aria-label="Ball" title="Ball"><span>⚽</span><span>Ball</span></button>
-          <button class="care-option" data-play="bubble" aria-label="Bubbles" title="Bubbles"><span>🎈</span><span>Bubbles</span></button>
-          <button class="care-option" data-play="feather" aria-label="Feather" title="Feather"><span>🍃</span><span>Feather</span></button>
-          <button class="care-option" data-play="butterfly" aria-label="Butterfly" title="Butterfly"><span>🦋</span><span>Butterfly</span></button>
-          <button class="care-option" data-play="chase" aria-label="Light chase" title="Light chase"><span>✨</span><span>Light chase</span></button>
+          <button class="care-option" data-play="yarn" aria-label="Yarn" title="Yarn"><span class="play-mini yarn-mini"></span><span>Yarn</span></button>
+          <button class="care-option" data-play="ball" aria-label="Ball" title="Ball"><span class="play-mini ball-mini"></span><span>Ball</span></button>
+          <button class="care-option" data-play="bubble" aria-label="Bubbles" title="Bubbles"><span class="play-mini bubbles-mini"></span><span>Bubbles</span></button>
+          <button class="care-option" data-play="feather" aria-label="Feather" title="Feather"><span class="play-mini feather-mini"></span><span>Feather</span></button>
+          <button class="care-option" data-play="butterfly" aria-label="Butterfly" title="Butterfly"><span class="play-mini butterfly-mini"></span><span>Butterfly</span></button>
+          <button class="care-option" data-play="chase" aria-label="Light chase" title="Light chase"><span class="play-mini light-mini"></span><span>Light chase</span></button>
         </div></section>
 
         <section id="care-interact" class="care-sheet" aria-label="Command interactions"><div class="care-grid">
@@ -332,40 +284,21 @@
           <button class="care-option" data-home="bed" aria-label="Bed" title="Bed"><span>😴</span><span>Bed</span></button>
         </div></section>
 
-        <div class="floating-settings" aria-label="Pet settings">
-          <div id="settings-menu" class="settings-menu" hidden>
-            <button id="rename" type="button">Rename</button>
-            <button id="slime-color" type="button">Slime color</button>
-            <button id="background" type="button">Background</button>
-            <button id="howto" type="button" aria-expanded="false">How to</button>
-            <div id="howto-panel" class="howto-panel" hidden>
-              <strong>Free interaction</strong>
-              <span>Tap · double tap · hold · rub · drag · toss</span>
-              <span>Interact contains commands and tricks instead of duplicate gestures.</span>
-            </div>
-            <button id="reset" type="button">Reset</button>
-          </div>
-          <button id="settings-toggle" class="settings-toggle" type="button" aria-label="Open settings" aria-expanded="false">+</button>
-        </div>
+        <div class="floating-settings" aria-label="Pet settings"><div id="settings-menu" class="settings-menu" hidden><button id="rename" type="button">Rename</button><button id="slime-color" type="button">Slime color</button><button id="background" type="button">Background</button><button id="howto" type="button" aria-expanded="false">How to</button><div id="howto-panel" class="howto-panel" hidden><strong>Free interaction</strong><span>Tap · double tap · hold · rub · drag · toss</span><span>Interact contains commands and tricks instead of duplicate gestures.</span></div><button id="reset" type="button">Reset</button></div><button id="settings-toggle" class="settings-toggle" type="button" aria-label="Open settings" aria-expanded="false">+</button></div>
       </section>
 
       <section class="panel bottom-panel" aria-label="Pet status and actions">
-        <section class="stats" aria-label="Pet stats">
-          <div class="stat"><div class="stat-label"><span>Happiness</span><strong id="happiness-value">80</strong></div><progress id="happiness" max="100" value="80">80%</progress></div>
-          <div class="stat"><div class="stat-label"><span>Fullness</span><strong id="fullness-value">70</strong></div><progress id="fullness" max="100" value="70">70%</progress></div>
-          <div class="stat"><div class="stat-label"><span>Energy</span><strong id="energy-value">85</strong></div><progress id="energy" max="100" value="85">85%</progress></div>
-        </section>
+        <section class="stats" aria-label="Pet stats"><div class="stat"><div class="stat-label"><span>Happiness</span><strong id="happiness-value">80</strong></div><progress id="happiness" max="100" value="80">80%</progress></div><div class="stat"><div class="stat-label"><span>Fullness</span><strong id="fullness-value">70</strong></div><progress id="fullness" max="100" value="70">70%</progress></div><div class="stat"><div class="stat-label"><span>Energy</span><strong id="energy-value">85</strong></div><progress id="energy" max="100" value="85">85%</progress></div></section>
         <section class="actions" aria-label="Care areas">
           <button type="button" data-care="food"><span class="action-icon">🍓</span><span>Food</span></button>
-          <button type="button" data-care="play"><span class="action-icon">🎮</span><span>Play</span></button>
+          <button type="button" data-care="play"><span class="action-icon">🎲</span><span>Play</span></button>
           <button type="button" data-care="interact"><span class="action-icon">👋</span><span>Interact</span></button>
           <button type="button" data-care="home"><span class="action-icon">🏠</span><span>Home</span></button>
         </section>
       </section>
     </section>
   </main>
-
-  <script src="script.js?v=20260923-8"></script>
-  <script src="care.js?v=20260923-8"></script>
+  <script src="script.js?v=20260923-9"></script>
+  <script src="care.js?v=20260923-9"></script>
 </body>
 </html>
