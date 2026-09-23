@@ -7,6 +7,18 @@
   <meta name="description" content="A tiny interactive slime pet that lives in your browser.">
   <title>Pet Slime</title>
   <link rel="stylesheet" href="styles.css">
+  <style>
+    .slime.feed-react .mouth,
+    .slime.feed-face .mouth {
+      border-color: #456f60;
+      background: #f3a3ad;
+      box-shadow: inset 0 7px 0 rgba(255,255,255,.18), inset 0 -6px 0 rgba(152,76,88,.12);
+    }
+    .slime.feed-react .mouth::after,
+    .slime.feed-face .mouth::after {
+      background: #d96f82;
+    }
+  </style>
 </head>
 <body>
   <main class="app" aria-labelledby="pet-name">
