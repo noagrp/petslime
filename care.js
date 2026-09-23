@@ -111,7 +111,7 @@
     else if(kind==='sprint'){startAction(button,'play-sprint',3200,`${state.name} sprints across the playground!`,'sprint');[650,1250,1900,2550].forEach(d=>later(()=>groundPuff(2,true),d))}
     else if(kind==='skip'){startAction(button,'play-skip',4000,`${state.name} skips around in a steady rhythm!`,'skip');[850,1650,2450,3250].forEach(d=>later(()=>groundPuff(1,true),d))}
     else if(kind==='dodge'){startAction(button,'play-dodge',3600,`${state.name} dodges left and right!`,'dodge')}
-    else if(kind==='roll'){startAction(button,'play-roll',4600,`${state.name} rolls slowly once, then spins fast in place!`,'roll')}
+    else if(kind==='roll'){startAction(button,'play-roll',4600,`${state.name} rolls and acts cute.`,'roll')}
   }));
 
   function command(button,cls,duration,message,effect='none'){clearTimers();clearAction();selectOption(button);stopThrow();clearReactionClasses();void els.slime.offsetWidth;els.slime.classList.add(cls);shadow(cls.replace('cmd-',''),duration);if(effect==='impact')later(impact,720);if(effect==='spark')later(()=>particles('✦',1,'command-peace'),420);if(effect==='dust'){later(()=>groundPuff(3),550);later(()=>groundPuff(2),1100);later(()=>groundPuff(2),2150)}commit(message);commandTimer=setTimeout(()=>{els.slime.classList.remove(cls);els.slime.classList.add('idle')},duration)}
@@ -122,7 +122,7 @@
     else if(kind==='wave')command(button,'cmd-wave',3000,`${state.name} waves while backing away, then comes back.`);
     else if(kind==='hide'){const side=Math.random()<.5?'cmd-hide-left':'cmd-hide-right';command(button,side,3000,`${state.name} hides at the side and peeks back at you.`)}
     else if(kind==='dig')command(button,'cmd-dig',3000,`${state.name} digs downward and peeks out from the ground.`,'dust');
-    else if(kind==='bubble'){clearTimers();clearAction();selectOption(button);stopThrow();clearReactionClasses();els.slime.classList.add('bubble-blow');shadow('bubble',6200);[350,1250,2200,3200,4250,5250].forEach(d=>later(bubble,d));commit(`${state.name} blows bubbles toward you, one by one.`);activityTimer=setTimeout(()=>{els.slime.classList.remove('bubble-blow');els.slime.classList.add('idle')},6200)}
+    else if(kind==='bubble'){clearTimers();clearAction();selectOption(button);stopThrow();clearReactionClasses();els.slime.classList.add('bubble-blow');shadow('bubble',6200);[350,1250,2200,3200,4250,5250].forEach(d=>later(bubble,d));commit(`${state.name} blows bubbles toward you.`);activityTimer=setTimeout(()=>{els.slime.classList.remove('bubble-blow');els.slime.classList.add('idle')},6200)}
   }));
 
   function repeatParticles(symbol,count,cls,repeats,gap){for(let i=0;i<repeats;i++)later(()=>particles(symbol,count,cls),i*gap)}
