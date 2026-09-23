@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#dff6e8">
   <meta name="description" content="A tiny interactive slime pet that lives in your browser.">
   <title>Pet Slime</title>
-  <link rel="stylesheet" href="styles.css?v=20260923-10">
+  <link rel="stylesheet" href="styles.css?v=20260923-11">
   <style>
     .panel {
       background:rgba(255,255,255,.44)!important;
@@ -59,11 +59,11 @@
     .toy.emoji-toy.show{opacity:1}
 
     .toy.home-tv,.toy.home-shower,.toy.home-bed{color:transparent;filter:none}
-    .toy.home-tv{left:50%;bottom:50px;width:92px;height:72px;z-index:3}
+    .toy.home-tv{left:50%;bottom:50px;width:88px;height:70px;z-index:3}
     .toy.home-tv::before{content:"";position:absolute;inset:0 5px 10px;border-radius:10px;border:5px solid #4e5a57;background:linear-gradient(145deg,#bfe2ee,#8fb9cd 55%,#dce8e5);box-shadow:0 8px 18px rgba(50,69,62,.18)}
-    .toy.home-tv::after{content:"";position:absolute;left:31px;bottom:0;width:30px;height:10px;border-radius:4px 4px 2px 2px;background:#59635f}
-    .toy.home-tv.show{animation:tvRest 5.2s ease both}
-    @keyframes tvRest{0%{opacity:0;transform:translate(125px,8px) scale(.7)}12%,88%{opacity:1;transform:translate(96px,0) scale(1)}100%{opacity:0;transform:translate(96px,0) scale(.92)}}
+    .toy.home-tv::after{content:"";position:absolute;left:29px;bottom:0;width:28px;height:10px;border-radius:4px 4px 2px 2px;background:#59635f}
+    .toy.home-tv.show{animation:tvRest 5.6s ease both}
+    @keyframes tvRest{0%{opacity:0;transform:translate(98px,8px) scale(.76)}12%,88%{opacity:1;transform:translate(62px,0) scale(1)}100%{opacity:0;transform:translate(62px,0) scale(.94)}}
 
     .toy.home-shower{left:50%;bottom:206px;width:88px;height:54px;z-index:7}
     .toy.home-shower::before{content:"";position:absolute;left:22px;top:8px;width:52px;height:18px;border-radius:14px 14px 7px 7px;background:#728b95;box-shadow:inset 0 -5px 0 rgba(55,78,86,.18),0 6px 12px rgba(45,67,72,.15);transform:rotate(8deg)}
@@ -98,6 +98,8 @@
       .floating-settings{right:8px;top:8px}
       .floating-settings .settings-toggle{width:34px;height:34px;font-size:1.05rem}
       .floating-settings .settings-menu{width:min(178px,62vw);top:42px}
+      .toy.home-tv{width:82px;height:64px}
+      .toy.home-tv::after{left:26px;width:26px}
       .toy.home-bed{width:190px}
       .toy.home-bed::before{left:-95px;width:190px}
     }
@@ -147,6 +149,7 @@
 
         <section id="care-home" class="care-sheet" aria-label="Home and rest choices"><div class="care-grid">
           <button class="care-option" data-home="tv" aria-label="TV" title="TV"><span>📺</span><span>TV</span></button>
+          <button class="care-option" data-home="game" aria-label="Gaming" title="Gaming"><span>🎮</span><span>Gaming</span></button>
           <button class="care-option" data-home="shower" aria-label="Shower" title="Shower"><span>🚿</span><span>Shower</span></button>
           <button class="care-option" data-home="bed" aria-label="Bed" title="Bed"><span>😴</span><span>Bed</span></button>
         </div></section>
@@ -165,7 +168,7 @@
       </section>
     </section>
   </main>
-  <script src="script.js?v=20260923-10"></script>
-  <script src="care.js?v=20260923-10"></script>
+  <script src="script.js?v=20260923-11"></script>
+  <script src="care.js?v=20260923-11"></script>
 </body>
 </html>
