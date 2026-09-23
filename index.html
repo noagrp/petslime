@@ -6,107 +6,94 @@
   <meta name="theme-color" content="#dff6e8">
   <meta name="description" content="A tiny interactive slime pet that lives in your browser.">
   <title>Pet Slime</title>
-  <link rel="stylesheet" href="styles.css?v=20260923-3">
+  <link rel="stylesheet" href="styles.css?v=20260923-4">
   <style>
+    .panel {
+      background: rgba(255,255,255,.46) !important;
+      border-color: rgba(255,255,255,.66) !important;
+      box-shadow: 0 14px 38px rgba(52,94,74,.09) !important;
+      backdrop-filter: blur(14px) saturate(1.08) !important;
+      -webkit-backdrop-filter: blur(14px) saturate(1.08) !important;
+    }
+
     .play-panel,
     .stage {
       min-height: 360px;
       height: 360px;
     }
 
+    .care-sheet {
+      position: absolute;
+      inset: auto 8px 8px;
+      z-index: 26;
+      padding: 12px;
+      border: 1px solid rgba(255,255,255,.72);
+      border-radius: 22px;
+      background: rgba(255,255,255,.68);
+      box-shadow: 0 14px 34px rgba(52,94,74,.13);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      transform: translateX(112%);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform .28s ease, opacity .22s ease;
+    }
+    .care-sheet.open { transform: translateX(0); opacity: 1; pointer-events: auto; }
+    .care-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+    .care-back {
+      width: 30px; height: 30px; border: 0; border-radius: 50%;
+      background: rgba(255,255,255,.76); color: #486658; cursor: pointer;
+    }
+    .care-title { margin: 0; font-size: .86rem; color: #395447; }
+    .care-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; }
+    .care-option {
+      min-height: 66px; padding: 7px 4px; border: 1px solid rgba(61,111,87,.09);
+      border-radius: 15px; background: rgba(255,255,255,.7); color: #395447;
+      display: grid; place-items: center; gap: 2px; font-size: .68rem; font-weight: 700;
+      cursor: pointer;
+    }
+    .care-option span:first-child { font-size: 1.35rem; }
+    .care-note { margin: 8px 2px 0; font-size: .66rem; color: #70867b; line-height: 1.35; }
+
     .floating-settings {
-      position: absolute;
-      right: 12px;
-      bottom: 12px;
-      z-index: 40;
-      pointer-events: auto;
-      touch-action: manipulation;
+      position: absolute; right: 12px; top: 12px; z-index: 40;
+      pointer-events: auto; touch-action: manipulation;
     }
-
     .floating-settings .settings-toggle {
-      position: relative;
-      width: 34px;
-      height: 34px;
-      margin: 0 0 0 auto;
-      pointer-events: auto;
-      touch-action: manipulation;
-      font-size: 1.15rem;
-      background: rgba(255,255,255,.82);
-      box-shadow: 0 6px 18px rgba(46,91,69,.14);
+      position: relative; width: 34px; height: 34px; margin: 0 0 0 auto;
+      pointer-events: auto; touch-action: manipulation; font-size: 1.15rem;
+      background: rgba(255,255,255,.72); box-shadow: 0 6px 18px rgba(46,91,69,.12);
     }
-
     .floating-settings .settings-menu {
-      position: absolute;
-      right: 0;
-      bottom: 43px;
-      z-index: 41;
-      width: 176px;
-      padding: 0;
-      border: 0;
-      background: transparent;
-      box-shadow: none;
-      backdrop-filter: none;
-      pointer-events: auto;
-      touch-action: manipulation;
+      position: absolute; right: 0; top: 43px; z-index: 41; width: 176px;
+      padding: 0; border: 0; background: transparent; box-shadow: none;
+      backdrop-filter: none; pointer-events: auto; touch-action: manipulation;
     }
-
     .floating-settings .settings-menu[hidden] { display: none !important; }
-
     .floating-settings .settings-menu button {
-      width: 100%;
-      margin-top: 6px;
-      padding: 10px 11px;
-      border: 1px solid rgba(255,255,255,.84);
-      border-radius: 14px;
-      background: rgba(255,255,255,.9);
-      box-shadow: 0 8px 22px rgba(52,94,74,.12);
-      backdrop-filter: blur(14px);
-      text-align: left;
-      pointer-events: auto;
-      touch-action: manipulation;
+      width: 100%; margin-top: 6px; padding: 10px 11px;
+      border: 1px solid rgba(255,255,255,.84); border-radius: 14px;
+      background: rgba(255,255,255,.86); box-shadow: 0 8px 22px rgba(52,94,74,.11);
+      backdrop-filter: blur(14px); text-align: left; pointer-events: auto; touch-action: manipulation;
     }
-
     .floating-settings .howto-panel {
-      margin: 6px 0 0;
-      padding: 10px 11px;
-      border: 1px solid rgba(255,255,255,.84);
-      border-radius: 14px;
-      background: rgba(255,255,255,.92);
-      box-shadow: 0 8px 22px rgba(52,94,74,.12);
-      backdrop-filter: blur(14px);
-      pointer-events: auto;
+      margin: 6px 0 0; padding: 10px 11px; border: 1px solid rgba(255,255,255,.84);
+      border-radius: 14px; background: rgba(255,255,255,.9); box-shadow: 0 8px 22px rgba(52,94,74,.11);
+      backdrop-filter: blur(14px); pointer-events: auto;
     }
-
     .particle.food-crumb {
-      color: #d96f82;
-      font-size: .72rem !important;
-      font-weight: 900;
-      text-shadow: 0 1px 0 rgba(255,255,255,.45);
-      animation: particleRise .6s ease-out forwards;
+      color: #d96f82; font-size: .72rem !important; font-weight: 900;
+      text-shadow: 0 1px 0 rgba(255,255,255,.45); animation: particleRise .6s ease-out forwards;
     }
 
     @media (max-width: 420px) {
-      .play-panel,
-      .stage {
-        min-height: 330px;
-        height: 330px;
-      }
-
-      .floating-settings {
-        right: 8px;
-        bottom: 8px;
-      }
-
-      .floating-settings .settings-toggle {
-        width: 34px;
-        height: 34px;
-        font-size: 1.05rem;
-      }
-
-      .floating-settings .settings-menu {
-        width: min(178px, 62vw);
-        bottom: 42px;
-      }
+      .play-panel,.stage { min-height: 340px; height: 340px; }
+      .floating-settings { right: 8px; top: 8px; }
+      .floating-settings .settings-toggle { width: 34px; height: 34px; font-size: 1.05rem; }
+      .floating-settings .settings-menu { width: min(178px,62vw); top: 42px; }
+      .care-sheet { inset: auto 5px 5px; padding: 10px; }
+      .care-grid { gap: 6px; }
+      .care-option { min-height: 60px; }
     }
   </style>
 </head>
@@ -125,27 +112,64 @@
           <div id="toy" class="toy" aria-hidden="true"></div>
           <div id="food" class="food" aria-hidden="true">🍓</div>
           <div id="sleep-fx" class="sleep-fx" aria-hidden="true"><span>Z</span><span>z</span><span>z</span></div>
-
           <div id="slime" class="slime" role="img" aria-label="A happy slime" tabindex="0">
-            <span class="shine" aria-hidden="true"></span>
-            <span class="eye eye-left" aria-hidden="true"></span>
-            <span class="eye eye-right" aria-hidden="true"></span>
-            <span class="mouth" aria-hidden="true"></span>
+            <span class="shine" aria-hidden="true"></span><span class="eye eye-left" aria-hidden="true"></span>
+            <span class="eye eye-right" aria-hidden="true"></span><span class="mouth" aria-hidden="true"></span>
           </div>
           <span id="slime-shadow" class="slime-shadow" aria-hidden="true"></span>
         </div>
 
+        <section id="care-food" class="care-sheet" aria-label="Food choices">
+          <div class="care-head"><button class="care-back" type="button" aria-label="Back">‹</button><h2 class="care-title">Food</h2></div>
+          <div class="care-grid">
+            <button class="care-option" data-food="🍓"><span>🍓</span><span>Strawberry</span></button>
+            <button class="care-option" data-food="🍎"><span>🍎</span><span>Apple</span></button>
+            <button class="care-option" data-food="🍪"><span>🍪</span><span>Cookie</span></button>
+            <button class="care-option" data-food="🍇"><span>🍇</span><span>Grapes</span></button>
+            <button class="care-option" data-food="🍉"><span>🍉</span><span>Watermelon</span></button>
+            <button class="care-option" data-food="🥕"><span>🥕</span><span>Carrot</span></button>
+          </div>
+        </section>
+
+        <section id="care-play" class="care-sheet" aria-label="Play choices">
+          <div class="care-head"><button class="care-back" type="button" aria-label="Back">‹</button><h2 class="care-title">Play</h2></div>
+          <div class="care-grid">
+            <button class="care-option" data-play="yarn"><span>🧶</span><span>Yarn</span></button>
+            <button class="care-option" data-play="ball"><span>⚽</span><span>Ball</span></button>
+            <button class="care-option" data-play="bubble"><span>🫧</span><span>Bubbles</span></button>
+            <button class="care-option" data-play="feather"><span>🪶</span><span>Feather</span></button>
+            <button class="care-option" data-play="butterfly"><span>🦋</span><span>Butterfly</span></button>
+            <button class="care-option" data-play="chase"><span>🔵</span><span>Light chase</span></button>
+          </div>
+        </section>
+
+        <section id="care-interact" class="care-sheet" aria-label="Interaction choices">
+          <div class="care-head"><button class="care-back" type="button" aria-label="Back">‹</button><h2 class="care-title">Interact</h2></div>
+          <div class="care-grid">
+            <button class="care-option" data-interact="pet"><span>💚</span><span>Pet</span></button>
+            <button class="care-option" data-interact="squish"><span>🫳</span><span>Squish</span></button>
+            <button class="care-option" data-interact="tap"><span>👆</span><span>Tap</span></button>
+            <button class="care-option" data-interact="double"><span>✌️</span><span>Double tap</span></button>
+            <button class="care-option" data-interact="pickup"><span>🤲</span><span>Pick up</span></button>
+            <button class="care-option" data-interact="rub"><span>🫶</span><span>Rub</span></button>
+          </div>
+          <p class="care-note">You can also touch, hold, rub, drag and toss the slime directly.</p>
+        </section>
+
+        <section id="care-home" class="care-sheet" aria-label="Home choices">
+          <div class="care-head"><button class="care-back" type="button" aria-label="Back">‹</button><h2 class="care-title">Home</h2></div>
+          <div class="care-grid">
+            <button class="care-option" data-home="bed"><span>🛏️</span><span>Bed</span></button>
+            <button class="care-option" data-home="house"><span>🏠</span><span>House</span></button>
+            <button class="care-option" data-home="cushion"><span>🛋️</span><span>Relax</span></button>
+          </div>
+        </section>
+
         <div class="floating-settings" aria-label="Pet settings">
           <div id="settings-menu" class="settings-menu" hidden>
-            <button id="rename" type="button">Rename</button>
-            <button id="slime-color" type="button">Slime color</button>
-            <button id="background" type="button">Background</button>
-            <button id="howto" type="button" aria-expanded="false">How to</button>
-            <div id="howto-panel" class="howto-panel" hidden>
-              <strong>Play with your slime</strong>
-              <span>Tap · double tap · hold · rub · drag · toss</span>
-              <span>Feed, play, rest, and pet buttons each have their own reaction.</span>
-            </div>
+            <button id="rename" type="button">Rename</button><button id="slime-color" type="button">Slime color</button>
+            <button id="background" type="button">Background</button><button id="howto" type="button" aria-expanded="false">How to</button>
+            <div id="howto-panel" class="howto-panel" hidden><strong>Play with your slime</strong><span>Tap · double tap · hold · rub · drag · toss</span><span>Use Food, Play, Interact and Home for more choices.</span></div>
             <button id="reset" type="button">Reset</button>
           </div>
           <button id="settings-toggle" class="settings-toggle" type="button" aria-label="Open settings" aria-expanded="false">+</button>
@@ -154,30 +178,19 @@
 
       <section class="panel bottom-panel" aria-label="Pet status and actions">
         <section class="stats" aria-label="Pet stats">
-          <div class="stat">
-            <div class="stat-label"><span>Happiness</span><strong id="happiness-value">80</strong></div>
-            <progress id="happiness" max="100" value="80">80%</progress>
-          </div>
-          <div class="stat">
-            <div class="stat-label"><span>Fullness</span><strong id="fullness-value">70</strong></div>
-            <progress id="fullness" max="100" value="70">70%</progress>
-          </div>
-          <div class="stat">
-            <div class="stat-label"><span>Energy</span><strong id="energy-value">85</strong></div>
-            <progress id="energy" max="100" value="85">85%</progress>
-          </div>
+          <div class="stat"><div class="stat-label"><span>Happiness</span><strong id="happiness-value">80</strong></div><progress id="happiness" max="100" value="80">80%</progress></div>
+          <div class="stat"><div class="stat-label"><span>Fullness</span><strong id="fullness-value">70</strong></div><progress id="fullness" max="100" value="70">70%</progress></div>
+          <div class="stat"><div class="stat-label"><span>Energy</span><strong id="energy-value">85</strong></div><progress id="energy" max="100" value="85">85%</progress></div>
         </section>
-
-        <section class="actions" aria-label="Care actions">
-          <button type="button" data-action="feed"><span class="action-icon">🍓</span><span>Feed</span></button>
-          <button type="button" data-action="play"><span class="action-icon">🧶</span><span>Play</span></button>
-          <button type="button" data-action="rest"><span class="action-icon">🌙</span><span>Rest</span></button>
-          <button type="button" data-action="pet"><span class="action-icon">💚</span><span>Pet</span></button>
+        <section class="actions" aria-label="Care areas">
+          <button type="button" data-care="food"><span class="action-icon">🍓</span><span>Food</span></button>
+          <button type="button" data-care="play"><span class="action-icon">🧶</span><span>Play</span></button>
+          <button type="button" data-care="interact"><span class="action-icon">💚</span><span>Interact</span></button>
+          <button type="button" data-care="home"><span class="action-icon">🏠</span><span>Home</span></button>
         </section>
       </section>
     </section>
   </main>
-
-  <script src="script.js?v=20260923-3"></script>
+  <script src="script.js?v=20260923-4"></script>
 </body>
 </html>
