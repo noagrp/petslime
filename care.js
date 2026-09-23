@@ -1,6 +1,10 @@
 (() => {
   const sheets = [...document.querySelectorAll('.care-sheet')];
   const careButtons = [...document.querySelectorAll('[data-care]')];
+  const toyKinds = [
+    'play-yarn','play-ball','play-bubble','play-feather','play-butterfly','play-chase',
+    'home-tv','home-shower','home-bed'
+  ];
   let activeCare = '';
 
   function closeCare() {
@@ -40,9 +44,17 @@
     button.classList.add('active');
   }
 
+  function setToy(kind, symbol, duration = 1500) {
+    els.toy.classList.remove('show', ...toyKinds);
+    els.toy.classList.add('emoji-toy', kind);
+    els.toy.textContent = symbol;
+    void els.toy.offsetWidth;
+    replayFx(els.toy, 'show', duration);
+  }
+
   const foodInfo = {
     '🍓': ['strawberry', '•', 'food-crumb'],
-    '🍎': ['apple', '●', 'apple-bit'],
+    '🍏': ['green apple', '●', 'apple-bit'],
     '🍪': ['cookie', '▪', 'cookie-bit'],
     '🍇': ['grapes', '●', 'grape-bit'],
     '🍉': ['watermelon', '◆', 'melon-bit'],
@@ -71,12 +83,42 @@
   });
 
   const playInfo = {
-    yarn: ['🧶', '♪', 'play-note', name => `${name} chases the yarn!`],
-    ball: ['⚽', '●', 'ball-pop', name => `${name} bounces after the ball!`],
-    bubble: ['🫧', '○', 'bubble-pop', name => `${name} tries to catch the bubbles!`],
-    feather: ['🪶', '〰', 'feather-swish', name => `${name} follows the feather!`],
-    butterfly: ['🦋', '✦', 'butterfly-spark', name => `${name} hops after the butterfly!`],
-    chase: ['🔵', '•', 'light-dot', name => `${name} chases the little light!`]
+    yarn: {
+      symbol: '🧶', toyClass: 'play-yarn', duration: 1350,
+      reaction: () => react('play-react', 1250),
+      particle: ['♪', 4, 'play-note'],
+      message: name => `${name} scurries after the rolling yarn!`
+    },
+    ball: {
+      symbol: '⚽', toyClass: 'play-ball', duration: 1450,
+      reaction: () => react('double-react', 760),
+      particle: ['●', 4, 'ball-pop'],
+      message: name => `${name} hops after the bouncing ball!`
+    },
+    bubble: {
+      symbol: '🫧', toyClass: 'play-bubble', duration: 1650,
+      reaction: () => react('tap-react', 520),
+      particle: ['○', 6, 'bubble-pop'],
+      message: name => `${name} watches the bubbles float higher and higher.`
+    },
+    feather: {
+      symbol: '🪶', toyClass: 'play-feather', duration: 1700,
+      reaction: () => react('pet-react', 900, 'pet-face'),
+      particle: ['〰', 4, 'feather-swish'],
+      message: name => `${name} sways under the drifting feather.`
+    },
+    butterfly: {
+      symbol: '🦋', toyClass: 'play-butterfly', duration: 1900,
+      reaction: () => react('double-react', 920),
+      particle: ['✦', 5, 'butterfly-spark'],
+      message: name => `${name} looks up and follows the butterfly overhead!`
+    },
+    chase: {
+      symbol: '🔵', toyClass: 'play-chase', duration: 1650,
+      reaction: () => react('play-react', 1450),
+      particle: ['•', 5, 'light-dot'],
+      message: name => `${name} darts after the little light!`
+    }
   };
 
   function playChoice(kind, button) {
@@ -91,12 +133,10 @@
     state.happiness += 16;
     state.energy -= 10;
     state.fullness -= 4;
-    els.toy.textContent = info[0];
-    els.toy.classList.add('emoji-toy');
-    replayFx(els.toy, 'show', 1300);
-    react('play-react', 1250);
-    window.setTimeout(() => particles(info[1], 5, info[2]), 360);
-    commit(info[3](state.name));
+    setToy(info.toyClass, info.symbol, info.duration);
+    info.reaction();
+    window.setTimeout(() => particles(info.particle[0], info.particle[1], info.particle[2]), 360);
+    commit(info.message(state.name));
   }
 
   document.querySelectorAll('[data-play]').forEach(button => {
@@ -137,7 +177,22 @@
 
   function homeAction(kind, button) {
     selectOption(button);
-    if (kind === 'bed') {
+    if (kind === 'tv') {
+      state.energy += 6;
+      state.happiness += 5;
+      state.fullness -= 1;
+      setToy('home-tv', '📺', 2100);
+      react('pet-react', 1000, 'pet-face');
+      window.setTimeout(() => particles('♪', 4, 'tv-note'), 520);
+      commit(`${state.name} settles down and watches TV for a while.`);
+    } else if (kind === 'shower') {
+      state.energy += 4;
+      state.happiness += 4;
+      setToy('home-shower', '🚿', 1800);
+      react('hold-react', 900);
+      window.setTimeout(() => particles('•', 8, 'shower-drop'), 260);
+      commit(`${state.name} gets a refreshing little shower.`);
+    } else if (kind === 'bed') {
       if (state.energy >= 97) {
         react('tap-react', 420);
         commit(`${state.name} is too awake for bed.`);
@@ -145,22 +200,11 @@
       }
       state.energy += 22;
       state.fullness -= 3;
+      setToy('home-bed', '🛏️', 1700);
       replayFx(els.sleepFx, 'show', 1550);
       react('rest-react', 1450);
+      window.setTimeout(() => particles('·', 4, 'bed-dot'), 520);
       commit(`${state.name} curls up in bed... zzz.`);
-    } else if (kind === 'house') {
-      state.energy += 10;
-      state.happiness += 3;
-      state.fullness -= 1;
-      react('rest-react', 1150);
-      particles('⌂', 4, 'house-dot');
-      commit(`${state.name} hides safely inside the little house.`);
-    } else {
-      state.energy += 7;
-      state.happiness += 4;
-      react('pet-react', 900, 'pet-face');
-      particles('~', 5, 'cushion-dot');
-      commit(`${state.name} relaxes on the comfy cushion.`);
     }
   }
 
