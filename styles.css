@@ -64,18 +64,39 @@ h1 {
 
 .stage {
   position: relative;
-  height: 235px;
-  display: grid;
-  place-items: end center;
-  padding-bottom: 27px;
+  height: 270px;
   overflow: hidden;
+  touch-action: none;
+  user-select: none;
+  border-radius: 24px;
+}
+
+.fx-layer,
+.toy,
+.food,
+.sleep-fx,
+.slime,
+.slime-shadow,
+.gesture-hint {
+  position: absolute;
+}
+
+.fx-layer {
+  inset: 0;
+  pointer-events: none;
+  z-index: 8;
 }
 
 .slime {
-  position: relative;
-  z-index: 2;
+  --x: 0px;
+  --y: 0px;
+  --rot: 0deg;
+  left: 50%;
+  bottom: 43px;
+  z-index: 4;
   width: 172px;
   height: 137px;
+  margin-left: -86px;
   border-radius: 52% 48% 42% 42% / 61% 61% 39% 39%;
   background: linear-gradient(145deg, #9aefb9 0%, #55ca88 68%, #42b879 100%);
   border: 3px solid rgba(38, 117, 78, .22);
@@ -84,10 +105,16 @@ h1 {
     inset -13px -14px 25px rgba(19,101,61,.12),
     0 12px 22px rgba(55,126,91,.18);
   transform-origin: 50% 100%;
-  animation: slimeFloat 2.8s ease-in-out infinite;
-  cursor: pointer;
+  transform: translate3d(var(--x), var(--y), 0) rotate(var(--rot));
+  cursor: grab;
+  touch-action: none;
+  -webkit-user-select: none;
   user-select: none;
+  will-change: transform;
 }
+
+.slime:active { cursor: grabbing; }
+.slime:focus-visible { outline: 3px solid rgba(52,150,105,.28); outline-offset: 6px; }
 
 .shine {
   position: absolute;
@@ -108,6 +135,7 @@ h1 {
   border-radius: 50%;
   background: #244036;
   box-shadow: inset 3px 3px 0 rgba(255,255,255,.28);
+  transition: height .12s ease, top .12s ease, transform .12s ease;
 }
 .eye-left { left: 51px; }
 .eye-right { right: 51px; }
@@ -121,24 +149,99 @@ h1 {
   border-bottom: 4px solid #315247;
   border-radius: 0 0 30px 30px;
   transform: translateX(-50%);
+  transition: all .14s ease;
 }
 
 .slime-shadow {
-  position: absolute;
+  left: 50%;
+  bottom: 35px;
   z-index: 1;
-  bottom: 18px;
   width: 130px;
   height: 25px;
+  margin-left: -65px;
   border-radius: 50%;
   background: rgba(56, 91, 75, .14);
   filter: blur(3px);
-  animation: shadowPulse 2.8s ease-in-out infinite;
+  transform: translateX(var(--shadow-x, 0px)) scaleX(var(--shadow-scale, 1));
+  opacity: var(--shadow-opacity, .9);
+  transition: opacity .12s ease, transform .12s ease;
 }
 
-.slime.boop { animation: squish .38s ease; }
+.gesture-hint {
+  left: 0;
+  right: 0;
+  bottom: 1px;
+  margin: 0;
+  text-align: center;
+  font-size: .68rem;
+  color: #91a49b;
+  letter-spacing: .02em;
+}
+
+.slime.idle { animation: idleFloat 2.8s ease-in-out infinite; }
+.slime.tap-react { animation: tapBounce .38s cubic-bezier(.2,.9,.35,1); }
+.slime.double-react { animation: doubleHop .62s cubic-bezier(.2,.8,.25,1); }
+.slime.hold-react { animation: holdSquish .62s ease forwards; }
+.slime.pet-react { animation: happyWiggle .7s ease; }
+.slime.feed-react { animation: feedNibble 1.05s ease; }
+.slime.play-react { animation: playHop 1.2s ease; }
+.slime.rest-react { animation: settleDown 1.2s ease forwards; }
+.slime.dragging { transition: none; filter: saturate(1.08); }
+.slime.dragging .eye { transform: scaleY(1.05); }
+.slime.dragging .mouth { width: 22px; height: 10px; border: 3px solid #315247; border-radius: 50%; }
+.slime.pet-face .eye { height: 5px; top: 65px; box-shadow: none; }
+.slime.pet-face .mouth { width: 22px; height: 12px; top: 84px; }
 .slime.sleepy .eye { height: 4px; top: 66px; box-shadow: none; }
 .slime.hungry { filter: saturate(.72); }
 .slime.sad .mouth { height: 12px; top: 94px; border: 0; border-top: 4px solid #315247; border-radius: 30px 30px 0 0; }
+
+.food {
+  left: 50%;
+  bottom: 67px;
+  z-index: 3;
+  font-size: 2rem;
+  opacity: 0;
+  transform: translateX(88px) scale(.5);
+  pointer-events: none;
+}
+.food.show { animation: foodServe 1.05s ease both; }
+
+.toy {
+  left: 50%;
+  bottom: 54px;
+  z-index: 3;
+  width: 30px;
+  height: 30px;
+  margin-left: 72px;
+  border-radius: 50%;
+  background: repeating-linear-gradient(45deg, #d99adf 0 5px, #b77bc0 5px 10px);
+  box-shadow: inset -4px -5px 8px rgba(88,47,94,.18), 0 5px 10px rgba(72,64,76,.13);
+  opacity: 0;
+  pointer-events: none;
+}
+.toy.show { animation: toyBounce 1.2s ease both; }
+
+.sleep-fx {
+  right: 70px;
+  bottom: 112px;
+  z-index: 5;
+  width: 55px;
+  height: 70px;
+  opacity: 0;
+  pointer-events: none;
+}
+.sleep-fx span { position: absolute; font-weight: 800; color: #7c87a7; }
+.sleep-fx span:nth-child(1) { left: 3px; bottom: 2px; font-size: 1.2rem; }
+.sleep-fx span:nth-child(2) { left: 23px; bottom: 24px; font-size: .95rem; }
+.sleep-fx span:nth-child(3) { left: 39px; bottom: 46px; font-size: .72rem; }
+.sleep-fx.show { animation: zzz 1.5s ease both; }
+
+.particle {
+  position: absolute;
+  z-index: 9;
+  pointer-events: none;
+  animation: particleRise .85s ease-out forwards;
+}
 
 .stats {
   display: grid;
@@ -209,30 +312,87 @@ progress::-moz-progress-bar { background: #55c987; border-radius: 999px; }
 }
 .reset:hover { color: #587266; }
 
-@keyframes slimeFloat {
-  0%, 100% { transform: translateY(0) scaleX(1); }
-  50% { transform: translateY(-9px) scaleX(.98); }
+@keyframes idleFloat {
+  0%, 100% { transform: translate3d(var(--x), var(--y), 0) rotate(var(--rot)) scaleX(1); }
+  50% { transform: translate3d(var(--x), calc(var(--y) - 7px), 0) rotate(var(--rot)) scaleX(.985); }
 }
-@keyframes shadowPulse {
-  0%, 100% { transform: scaleX(1); opacity: .9; }
-  50% { transform: scaleX(.82); opacity: .6; }
+@keyframes tapBounce {
+  0% { transform: translate3d(var(--x), var(--y), 0) scale(1); }
+  35% { transform: translate3d(var(--x), calc(var(--y) + 9px), 0) scale(1.11,.84); }
+  68% { transform: translate3d(var(--x), calc(var(--y) - 12px), 0) scale(.94,1.09); }
+  100% { transform: translate3d(var(--x), var(--y), 0) scale(1); }
 }
-@keyframes squish {
-  0% { transform: translateY(0) scale(1); }
-  38% { transform: translateY(12px) scale(1.12,.82); }
-  72% { transform: translateY(-7px) scale(.93,1.1); }
-  100% { transform: translateY(0) scale(1); }
+@keyframes doubleHop {
+  0% { transform: translate3d(var(--x), var(--y), 0) rotate(0); }
+  28% { transform: translate3d(var(--x), calc(var(--y) - 38px), 0) rotate(-7deg) scale(.94,1.08); }
+  55% { transform: translate3d(var(--x), calc(var(--y) - 6px), 0) rotate(7deg) scale(1.06,.91); }
+  78% { transform: translate3d(var(--x), calc(var(--y) - 18px), 0) rotate(-3deg); }
+  100% { transform: translate3d(var(--x), var(--y), 0) rotate(0); }
+}
+@keyframes holdSquish {
+  0% { transform: translate3d(var(--x), var(--y), 0) scale(1); }
+  55%, 80% { transform: translate3d(var(--x), calc(var(--y) + 14px), 0) scale(1.2,.72); }
+  100% { transform: translate3d(var(--x), var(--y), 0) scale(1); }
+}
+@keyframes happyWiggle {
+  0%, 100% { transform: translate3d(var(--x), var(--y), 0) rotate(0); }
+  20% { transform: translate3d(calc(var(--x) - 8px), var(--y), 0) rotate(-6deg); }
+  40% { transform: translate3d(calc(var(--x) + 8px), var(--y), 0) rotate(6deg); }
+  60% { transform: translate3d(calc(var(--x) - 5px), var(--y), 0) rotate(-4deg); }
+  80% { transform: translate3d(calc(var(--x) + 5px), var(--y), 0) rotate(4deg); }
+}
+@keyframes feedNibble {
+  0%, 100% { transform: translate3d(var(--x), var(--y), 0); }
+  35% { transform: translate3d(calc(var(--x) + 42px), var(--y), 0) scale(.98,1.02); }
+  50% { transform: translate3d(calc(var(--x) + 42px), calc(var(--y) + 4px), 0) scale(1.07,.9); }
+  65% { transform: translate3d(calc(var(--x) + 42px), var(--y), 0) scale(.98,1.02); }
+}
+@keyframes playHop {
+  0%,100% { transform: translate3d(var(--x), var(--y), 0); }
+  22% { transform: translate3d(calc(var(--x) + 34px), calc(var(--y) - 28px), 0) rotate(5deg); }
+  44% { transform: translate3d(calc(var(--x) + 56px), var(--y), 0) scale(1.08,.9); }
+  68% { transform: translate3d(calc(var(--x) - 20px), calc(var(--y) - 20px), 0) rotate(-5deg); }
+}
+@keyframes settleDown {
+  0% { transform: translate3d(var(--x), var(--y), 0) scale(1); }
+  45%, 85% { transform: translate3d(var(--x), calc(var(--y) + 11px), 0) scale(1.08,.88); }
+  100% { transform: translate3d(var(--x), var(--y), 0) scale(1); }
+}
+@keyframes foodServe {
+  0% { opacity: 0; transform: translateX(100px) translateY(-20px) scale(.4) rotate(-15deg); }
+  28% { opacity: 1; transform: translateX(88px) translateY(0) scale(1.05) rotate(5deg); }
+  72% { opacity: 1; transform: translateX(42px) translateY(4px) scale(.7); }
+  100% { opacity: 0; transform: translateX(28px) translateY(8px) scale(.15); }
+}
+@keyframes toyBounce {
+  0% { opacity: 0; transform: translateX(30px) translateY(-50px) scale(.6); }
+  15% { opacity: 1; }
+  38% { transform: translateX(2px) translateY(0) scale(1); }
+  58% { transform: translateX(-42px) translateY(-22px) scale(.94); }
+  80% { opacity: 1; transform: translateX(-70px) translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateX(-96px) translateY(-8px) scale(.8); }
+}
+@keyframes zzz {
+  0% { opacity: 0; transform: translateY(8px); }
+  20%, 75% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-12px); }
+}
+@keyframes particleRise {
+  0% { opacity: 0; transform: translate(-50%,0) scale(.5) rotate(0); }
+  20% { opacity: 1; }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--drift, 0px)), -58px) scale(1.15) rotate(var(--spin, 12deg)); }
 }
 
 @media (max-width: 420px) {
   .pet-card { padding: 22px 18px; border-radius: 26px; }
-  .stage { height: 220px; }
-  .slime { width: 158px; height: 126px; }
+  .stage { height: 250px; }
+  .slime { width: 158px; height: 126px; margin-left: -79px; }
   .eye { top: 53px; }
   .eye-left { left: 47px; }
   .eye-right { right: 47px; }
   .mouth { top: 76px; }
   .actions button { min-height: 54px; }
+  .sleep-fx { right: 52px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
