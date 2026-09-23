@@ -7,67 +7,71 @@
   <meta name="description" content="A tiny interactive slime pet that lives in your browser.">
   <title>Pet Slime</title>
   <link rel="stylesheet" href="styles.css">
-  <style>
-    .slime.feed-react .mouth,
-    .slime.feed-face .mouth {
-      border-color: #456f60;
-      background: #f3a3ad;
-      box-shadow: inset 0 7px 0 rgba(255,255,255,.18), inset 0 -6px 0 rgba(152,76,88,.12);
-    }
-    .slime.feed-react .mouth::after,
-    .slime.feed-face .mouth::after {
-      background: #d96f82;
-    }
-  </style>
 </head>
 <body>
   <main class="app" aria-labelledby="pet-name">
-    <section class="pet-card">
-      <header class="pet-header">
+    <section class="pet-shell">
+      <header class="panel top-panel">
         <p class="eyebrow">PET SLIME</p>
         <h1 id="pet-name">Mochi</h1>
         <p id="message" class="message" aria-live="polite">Mochi is happy to see you.</p>
       </header>
 
-      <div id="stage" class="stage" aria-label="Mochi's play area">
-        <div id="fx-layer" class="fx-layer" aria-hidden="true"></div>
-        <div id="toy" class="toy" aria-hidden="true"></div>
-        <div id="food" class="food" aria-hidden="true">🍓</div>
-        <div id="sleep-fx" class="sleep-fx" aria-hidden="true"><span>Z</span><span>z</span><span>z</span></div>
+      <section class="play-panel" aria-label="Slime playground">
+        <div id="stage" class="stage" aria-label="Mochi's play area">
+          <div id="fx-layer" class="fx-layer" aria-hidden="true"></div>
+          <div id="toy" class="toy" aria-hidden="true"></div>
+          <div id="food" class="food" aria-hidden="true">🍓</div>
+          <div id="sleep-fx" class="sleep-fx" aria-hidden="true"><span>Z</span><span>z</span><span>z</span></div>
 
-        <div id="slime" class="slime" role="img" aria-label="A happy green slime" tabindex="0">
-          <span class="shine" aria-hidden="true"></span>
-          <span class="eye eye-left" aria-hidden="true"></span>
-          <span class="eye eye-right" aria-hidden="true"></span>
-          <span class="mouth" aria-hidden="true"></span>
-        </div>
-        <span id="slime-shadow" class="slime-shadow" aria-hidden="true"></span>
-        <p class="gesture-hint" aria-hidden="true">tap · double tap · hold · drag · toss</p>
-      </div>
-
-      <section class="stats" aria-label="Pet stats">
-        <div class="stat">
-          <div class="stat-label"><span>Happiness</span><strong id="happiness-value">80</strong></div>
-          <progress id="happiness" max="100" value="80">80%</progress>
-        </div>
-        <div class="stat">
-          <div class="stat-label"><span>Fullness</span><strong id="fullness-value">70</strong></div>
-          <progress id="fullness" max="100" value="70">70%</progress>
-        </div>
-        <div class="stat">
-          <div class="stat-label"><span>Energy</span><strong id="energy-value">85</strong></div>
-          <progress id="energy" max="100" value="85">85%</progress>
+          <div id="slime" class="slime" role="img" aria-label="A happy slime" tabindex="0">
+            <span class="shine" aria-hidden="true"></span>
+            <span class="eye eye-left" aria-hidden="true"></span>
+            <span class="eye eye-right" aria-hidden="true"></span>
+            <span class="mouth" aria-hidden="true"></span>
+          </div>
+          <span id="slime-shadow" class="slime-shadow" aria-hidden="true"></span>
         </div>
       </section>
 
-      <section class="actions" aria-label="Care actions">
-        <button type="button" data-action="feed"><span class="action-icon">🍓</span><span>Feed</span></button>
-        <button type="button" data-action="play"><span class="action-icon">🧶</span><span>Play</span></button>
-        <button type="button" data-action="rest"><span class="action-icon">🌙</span><span>Rest</span></button>
-        <button type="button" data-action="pet"><span class="action-icon">💚</span><span>Pet</span></button>
+      <section class="panel bottom-panel" aria-label="Pet status and actions">
+        <section class="stats" aria-label="Pet stats">
+          <div class="stat">
+            <div class="stat-label"><span>Happiness</span><strong id="happiness-value">80</strong></div>
+            <progress id="happiness" max="100" value="80">80%</progress>
+          </div>
+          <div class="stat">
+            <div class="stat-label"><span>Fullness</span><strong id="fullness-value">70</strong></div>
+            <progress id="fullness" max="100" value="70">70%</progress>
+          </div>
+          <div class="stat">
+            <div class="stat-label"><span>Energy</span><strong id="energy-value">85</strong></div>
+            <progress id="energy" max="100" value="85">85%</progress>
+          </div>
+        </section>
+
+        <section class="actions" aria-label="Care actions">
+          <button type="button" data-action="feed"><span class="action-icon">🍓</span><span>Feed</span></button>
+          <button type="button" data-action="play"><span class="action-icon">🧶</span><span>Play</span></button>
+          <button type="button" data-action="rest"><span class="action-icon">🌙</span><span>Rest</span></button>
+          <button type="button" data-action="pet"><span class="action-icon">💚</span><span>Pet</span></button>
+        </section>
       </section>
 
-      <button id="reset" class="reset" type="button">Reset pet</button>
+      <footer class="settings-footer" aria-label="Pet settings">
+        <div class="settings-row">
+          <button id="rename" type="button">Rename</button>
+          <button id="slime-color" type="button">Slime color</button>
+          <button id="background" type="button">Background</button>
+          <button id="howto" type="button" aria-expanded="false">How to</button>
+          <button id="reset" type="button">Reset</button>
+        </div>
+        <div id="howto-panel" class="howto-panel" hidden>
+          <strong>Play with your slime</strong>
+          <span>Tap · double tap · hold · rub · drag · toss</span>
+          <span>Feed, play, rest, and pet buttons each have their own reaction.</span>
+        </div>
+      </footer>
     </section>
   </main>
 
