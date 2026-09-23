@@ -10,11 +10,29 @@
   audio.loop=true;
   audio.preload='metadata';
   audio.volume=volume/100;
+
   function play(){if(!enabled||!activated||document.hidden)return;audio.play().catch(()=>{})}
   function pause(){audio.pause()}
   function activate(){if(activated)return;activated=true;play()}
   function setVolume(v){volume=Math.max(0,Math.min(40,Number(v)||0));audio.volume=volume/100;localStorage.setItem(VOL_KEY,String(volume))}
   function duck(ms=6500){clearTimeout(duckTimer);const normal=volume/100;audio.volume=Math.min(normal,.06);duckTimer=setTimeout(()=>{audio.volume=volume/100},ms)}
+
+  function bindSettingsToggle(){
+    const toggle=document.getElementById('settings-toggle');
+    const menu=document.getElementById('settings-menu');
+    if(!toggle||!menu||toggle.dataset.robustBound==='1')return;
+    toggle.dataset.robustBound='1';
+    toggle.addEventListener('click',event=>{
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      const open=menu.hidden;
+      menu.hidden=!open;
+      toggle.classList.toggle('open',open);
+      toggle.setAttribute('aria-expanded',String(open));
+      toggle.setAttribute('aria-label',open?'Close settings':'Open settings');
+    },true);
+  }
+
   function addControls(){
     const menu=document.getElementById('settings-menu');
     if(!menu||document.getElementById('background-music'))return;
@@ -34,9 +52,11 @@
     range.addEventListener('input',()=>{setVolume(range.value);value.textContent=`${volume}%`});
     wrap.append(label,range);menu.insertBefore(toggle,anchor||null);menu.insertBefore(wrap,anchor||null);
   }
+
   ['pointerdown','keydown','touchstart'].forEach(type=>document.addEventListener(type,activate,{once:true,passive:true}));
   document.addEventListener('visibilitychange',()=>{document.hidden?pause():play()});
   document.querySelector('[data-home="music"]')?.addEventListener('click',()=>{duck(6500);setTimeout(()=>window.petSfx?.('chime'),480)});
   window.petBgm={play,pause,setVolume,duck,get source(){return SOURCE}};
+  bindSettingsToggle();
   addControls();
 })();
