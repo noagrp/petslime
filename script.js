@@ -1,10 +1,28 @@
 const STORAGE_KEY = "petslime-state-v1";
 
+const SLIME_COLORS = [
+  ["#a9f2c3", "#55ca88", "#42b879"],
+  ["#b8ddff", "#6eb4ef", "#4d91d2"],
+  ["#ffd0e3", "#f08fb6", "#d96c9a"],
+  ["#e2ccff", "#aa83e3", "#8b65c7"],
+  ["#ffe7a8", "#efc45f", "#d6a63d"]
+];
+
+const BACKGROUNDS = [
+  ["#e9f8ef", "#d8efe9", "#e7e6fb"],
+  ["#eef7ff", "#dcecfb", "#ebe7ff"],
+  ["#fff4ec", "#f7e7d9", "#f6e6f0"],
+  ["#eef6ec", "#dfedd7", "#e8f3e2"],
+  ["#f4f0ff", "#e8e1f8", "#e3edf9"]
+];
+
 const defaults = () => ({
   name: "Mochi",
   happiness: 80,
   fullness: 70,
   energy: 85,
+  slimeColor: 0,
+  background: 0,
   lastUpdated: Date.now()
 });
 
@@ -24,6 +42,11 @@ const els = {
   happinessValue: document.getElementById("happiness-value"),
   fullnessValue: document.getElementById("fullness-value"),
   energyValue: document.getElementById("energy-value"),
+  rename: document.getElementById("rename"),
+  slimeColor: document.getElementById("slime-color"),
+  background: document.getElementById("background"),
+  howto: document.getElementById("howto"),
+  howtoPanel: document.getElementById("howto-panel"),
   reset: document.getElementById("reset")
 };
 
@@ -50,7 +73,6 @@ function applyOfflineDecay() {
   const now = Date.now();
   const elapsedHours = Math.max(0, (now - Number(state.lastUpdated || now)) / 3_600_000);
   const cappedHours = Math.min(elapsedHours, 72);
-
   state.fullness = clamp(state.fullness - cappedHours * 2.2);
   state.happiness = clamp(state.happiness - cappedHours * 0.9);
   state.energy = clamp(state.energy - cappedHours * 0.35);
@@ -60,6 +82,18 @@ function applyOfflineDecay() {
 function saveState() {
   state.lastUpdated = Date.now();
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function applyAppearance() {
+  const slime = SLIME_COLORS[state.slimeColor % SLIME_COLORS.length];
+  els.slime.style.setProperty("--slime-light", slime[0]);
+  els.slime.style.setProperty("--slime-main", slime[1]);
+  els.slime.style.setProperty("--slime-dark", slime[2]);
+
+  const bg = BACKGROUNDS[state.background % BACKGROUNDS.length];
+  document.body.style.setProperty("--page-a", bg[0]);
+  document.body.style.setProperty("--page-b", bg[1]);
+  document.body.style.setProperty("--page-c", bg[2]);
 }
 
 function defaultMessage() {
@@ -81,9 +115,9 @@ function render(message = defaultMessage()) {
   state.happiness = clamp(state.happiness);
   state.fullness = clamp(state.fullness);
   state.energy = clamp(state.energy);
-
   els.name.textContent = state.name;
   els.message.textContent = message;
+  els.stage.setAttribute("aria-label", `${state.name}'s play area`);
 
   for (const key of ["happiness", "fullness", "energy"]) {
     els[key].value = state[key];
@@ -91,6 +125,7 @@ function render(message = defaultMessage()) {
     els[`${key}Value`].textContent = state[key];
   }
 
+  applyAppearance();
   updateMoodClass();
 }
 
@@ -100,7 +135,6 @@ function setPosition(x = pos.x, y = pos.y, rotation = 0) {
   els.slime.style.setProperty("--x", `${x}px`);
   els.slime.style.setProperty("--y", `${y}px`);
   els.slime.style.setProperty("--rot", `${rotation}deg`);
-
   const lift = Math.max(0, -y);
   els.shadow.style.setProperty("--shadow-x", `${x}px`);
   els.shadow.style.setProperty("--shadow-scale", String(clampRange(1 - lift / 340, .55, 1)));
@@ -137,7 +171,6 @@ function react(className, duration = 650, extraClass = "") {
   void els.slime.offsetWidth;
   if (extraClass) els.slime.classList.add(extraClass);
   els.slime.classList.add(className);
-
   animationTimer = window.setTimeout(() => {
     els.slime.classList.remove(className);
     if (extraClass) els.slime.classList.remove(extraClass);
@@ -157,7 +190,6 @@ function particles(symbol, count = 4) {
   const slimeRect = els.slime.getBoundingClientRect();
   const cx = slimeRect.left - stageRect.left + slimeRect.width / 2;
   const cy = slimeRect.top - stageRect.top + slimeRect.height * .3;
-
   for (let i = 0; i < count; i += 1) {
     const particle = document.createElement("span");
     particle.className = "particle";
@@ -200,7 +232,6 @@ function queueTap() {
     doubleTap();
     return;
   }
-
   lastTapAt = now;
   tapTimer = window.setTimeout(() => {
     lastTapAt = 0;
@@ -235,7 +266,6 @@ function throwSlime(vx, vy) {
     const dt = Math.min(32, now - last) / 16.667;
     last = now;
     const b = bounds();
-
     velocityY += .78 * dt;
     x += velocityX * dt;
     y += velocityY * dt;
@@ -245,12 +275,10 @@ function throwSlime(vx, vy) {
       velocityX *= -.55;
       bounces += 1;
     }
-
     if (y < b.minY) {
       y = b.minY;
       velocityY *= -.35;
     }
-
     if (y >= 0) {
       y = 0;
       if (Math.abs(velocityY) > 2.2 && bounces < 4) {
@@ -263,9 +291,7 @@ function throwSlime(vx, vy) {
       }
     }
 
-    const rotation = clampRange(velocityX * 1.15, -12, 12);
-    setPosition(x, y, rotation);
-
+    setPosition(x, y, clampRange(velocityX * 1.15, -12, 12));
     if ((Math.abs(velocityX) > .35 || y < 0 || Math.abs(velocityY) > .4) && bounces < 7) {
       throwFrame = requestAnimationFrame(frame);
     } else {
@@ -275,7 +301,6 @@ function throwSlime(vx, vy) {
       particles("·", 3);
     }
   };
-
   throwFrame = requestAnimationFrame(frame);
 }
 
@@ -290,7 +315,7 @@ const actions = {
     replayFx(els.food, "show", 1100);
     react("feed-react", 1100);
     window.setTimeout(() => particles("♥", 3), 650);
-    return "Yum! Mochi scoots over for the strawberry.";
+    return `Yum! ${state.name} scoots over for the strawberry.`;
   },
   play() {
     if (state.energy < 10) {
@@ -328,8 +353,7 @@ const actions = {
 document.querySelectorAll("[data-action]").forEach(button => {
   button.addEventListener("click", () => {
     const action = button.dataset.action;
-    if (!actions[action]) return;
-    commit(actions[action]());
+    if (actions[action]) commit(actions[action]());
   });
 });
 
@@ -342,7 +366,6 @@ els.slime.addEventListener("pointerdown", event => {
   window.clearTimeout(animationTimer);
   clearReactionClasses();
   els.slime.setPointerCapture?.(event.pointerId);
-
   gesture = {
     id: event.pointerId,
     startX: event.clientX,
@@ -362,7 +385,6 @@ els.slime.addEventListener("pointerdown", event => {
     lastDirection: 0,
     holdTimer: 0
   };
-
   gesture.holdTimer = window.setTimeout(() => {
     if (!gesture || gesture.dragging || gesture.petting) return;
     gesture.holdTriggered = true;
@@ -374,7 +396,6 @@ els.slime.addEventListener("pointerdown", event => {
 els.slime.addEventListener("pointermove", event => {
   if (!gesture || event.pointerId !== gesture.id) return;
   event.preventDefault();
-
   const now = performance.now();
   const elapsed = now - gesture.startedAt;
   const dx = event.clientX - gesture.startX;
@@ -416,10 +437,11 @@ els.slime.addEventListener("pointermove", event => {
 
   if (gesture.dragging) {
     const b = bounds();
-    const x = clampRange(gesture.baseX + dx, b.minX, b.maxX);
-    const y = clampRange(gesture.baseY + dy, b.minY, b.maxY);
-    const rotation = clampRange(gesture.vx * 28, -12, 12);
-    setPosition(x, y, rotation);
+    setPosition(
+      clampRange(gesture.baseX + dx, b.minX, b.maxX),
+      clampRange(gesture.baseY + dy, b.minY, b.maxY),
+      clampRange(gesture.vx * 28, -12, 12)
+    );
   }
 
   gesture.lastX = event.clientX;
@@ -442,19 +464,16 @@ function finishGesture(event) {
     throwSlime(current.vx, current.vy);
     return;
   }
-
   if (current.petting) {
     els.slime.classList.remove("pet-face", "hold-react");
     petReaction(current.reversals >= 2 ? 7 : 4);
     return;
   }
-
   if (current.holdTriggered) {
     els.slime.classList.remove("hold-react");
     holdReaction();
     return;
   }
-
   queueTap();
 }
 
@@ -474,7 +493,41 @@ els.slime.addEventListener("keydown", event => {
   }
 });
 
+els.rename.addEventListener("click", () => {
+  const next = window.prompt("Give your slime a name:", state.name);
+  if (next === null) return;
+  const clean = next.trim().replace(/\s+/g, " ").slice(0, 20);
+  if (!clean) return;
+  state.name = clean;
+  saveState();
+  render(`${state.name} likes the new name!`);
+  react("double-react", 660);
+  particles("✨", 4);
+});
+
+els.slimeColor.addEventListener("click", () => {
+  state.slimeColor = (Number(state.slimeColor) + 1) % SLIME_COLORS.length;
+  applyAppearance();
+  saveState();
+  react("happyWiggle", 0);
+  render(`${state.name} has a fresh new color.`);
+});
+
+els.background.addEventListener("click", () => {
+  state.background = (Number(state.background) + 1) % BACKGROUNDS.length;
+  applyAppearance();
+  saveState();
+  render("A new little atmosphere.");
+});
+
+els.howto.addEventListener("click", () => {
+  const opening = els.howtoPanel.hidden;
+  els.howtoPanel.hidden = !opening;
+  els.howto.setAttribute("aria-expanded", String(opening));
+});
+
 els.reset.addEventListener("click", () => {
+  if (!window.confirm("Reset this slime back to Mochi and default settings?")) return;
   state = defaults();
   pos = { x: 0, y: 0 };
   setPosition(0, 0, 0);
