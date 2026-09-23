@@ -1,24 +1,31 @@
 (() => {
   const sheets = [...document.querySelectorAll('.care-sheet')];
+  const careButtons = [...document.querySelectorAll('[data-care]')];
+  let activeCare = '';
 
   function closeCare() {
     sheets.forEach(sheet => sheet.classList.remove('open'));
+    careButtons.forEach(button => button.classList.remove('active'));
+    activeCare = '';
   }
 
   function openCare(name) {
+    if (activeCare === name) {
+      closeCare();
+      return;
+    }
     closeCare();
     const sheet = document.getElementById(`care-${name}`);
+    const trigger = document.querySelector(`[data-care="${name}"]`);
     if (!sheet) return;
     sheet.classList.add('open');
+    trigger?.classList.add('active');
+    activeCare = name;
     setSettingsOpen(false);
   }
 
-  document.querySelectorAll('[data-care]').forEach(button => {
+  careButtons.forEach(button => {
     button.addEventListener('click', () => openCare(button.dataset.care));
-  });
-
-  document.querySelectorAll('.care-back').forEach(button => {
-    button.addEventListener('click', closeCare);
   });
 
   if (els.settingsToggle) {
@@ -27,47 +34,59 @@
     });
   }
 
-  function eat(symbol, label) {
+  function selectOption(button) {
+    const sheet = button.closest('.care-sheet');
+    sheet?.querySelectorAll('.care-option').forEach(item => item.classList.remove('active'));
+    button.classList.add('active');
+  }
+
+  const foodInfo = {
+    '🍓': ['strawberry', '•', 'food-crumb'],
+    '🍎': ['apple', '●', 'apple-bit'],
+    '🍪': ['cookie', '▪', 'cookie-bit'],
+    '🍇': ['grapes', '●', 'grape-bit'],
+    '🍉': ['watermelon', '◆', 'melon-bit'],
+    '🥕': ['carrot', '▲', 'carrot-bit']
+  };
+
+  function eat(symbol, button) {
+    const info = foodInfo[symbol] || ['snack', '•', 'food-crumb'];
     if (state.fullness >= 96) {
       react('tap-react', 420);
       commit(`${state.name} is already completely full.`);
       return;
     }
+    selectOption(button);
     els.food.textContent = symbol;
     state.fullness += 18;
     state.happiness += 3;
     replayFx(els.food, 'show', 1100);
     react('feed-react', 1100);
-    window.setTimeout(() => particles('•', 7, 'food-crumb'), 650);
-    commit(`Yum! ${state.name} munches the ${label}.`);
-    window.setTimeout(closeCare, 720);
+    window.setTimeout(() => particles(info[1], 7, info[2]), 620);
+    commit(`Yum! ${state.name} munches the ${info[0]}.`);
   }
 
-  const foodNames = {
-    '🍓': 'strawberry', '🍎': 'apple', '🍪': 'cookie',
-    '🍇': 'grapes', '🍉': 'watermelon', '🥕': 'carrot'
-  };
-
   document.querySelectorAll('[data-food]').forEach(button => {
-    button.addEventListener('click', () => eat(button.dataset.food, foodNames[button.dataset.food] || 'snack'));
+    button.addEventListener('click', () => eat(button.dataset.food, button));
   });
 
   const playInfo = {
-    yarn: ['🧶', '♪', name => `${name} chases the yarn!`],
-    ball: ['⚽', '●', name => `${name} bounces after the ball!`],
-    bubble: ['🫧', '○', name => `${name} tries to catch the bubbles!`],
-    feather: ['🪶', '〰', name => `${name} follows the feather!`],
-    butterfly: ['🦋', '✦', name => `${name} hops after the butterfly!`],
-    chase: ['🔵', '•', name => `${name} chases the little light!`]
+    yarn: ['🧶', '♪', 'play-note', name => `${name} chases the yarn!`],
+    ball: ['⚽', '●', 'ball-pop', name => `${name} bounces after the ball!`],
+    bubble: ['🫧', '○', 'bubble-pop', name => `${name} tries to catch the bubbles!`],
+    feather: ['🪶', '〰', 'feather-swish', name => `${name} follows the feather!`],
+    butterfly: ['🦋', '✦', 'butterfly-spark', name => `${name} hops after the butterfly!`],
+    chase: ['🔵', '•', 'light-dot', name => `${name} chases the little light!`]
   };
 
-  function playChoice(kind) {
+  function playChoice(kind, button) {
     if (state.energy < 10) {
       replayFx(els.sleepFx, 'show', 1200);
       react('rest-react', 850);
       commit(`${state.name} is too sleepy to play right now.`);
       return;
     }
+    selectOption(button);
     const info = playInfo[kind] || playInfo.yarn;
     state.happiness += 16;
     state.energy -= 10;
@@ -76,52 +95,76 @@
     els.toy.classList.add('emoji-toy');
     replayFx(els.toy, 'show', 1300);
     react('play-react', 1250);
-    window.setTimeout(() => particles(info[1], 5, 'play-note'), 420);
-    commit(info[2](state.name));
-    window.setTimeout(closeCare, 760);
+    window.setTimeout(() => particles(info[1], 5, info[2]), 360);
+    commit(info[3](state.name));
   }
 
   document.querySelectorAll('[data-play]').forEach(button => {
-    button.addEventListener('click', () => playChoice(button.dataset.play));
+    button.addEventListener('click', () => playChoice(button.dataset.play, button));
   });
 
   document.querySelectorAll('[data-interact]').forEach(button => {
     button.addEventListener('click', () => {
+      selectOption(button);
       const kind = button.dataset.interact;
-      if (kind === 'pet' || kind === 'rub') petReaction(kind === 'rub' ? 7 : 6);
-      else if (kind === 'squish') holdReaction();
-      else if (kind === 'tap') singleTap();
-      else if (kind === 'double') doubleTap();
-      else if (kind === 'pickup') {
+      if (kind === 'pet') {
+        state.happiness += 6;
+        react('pet-react', 720, 'pet-face');
+        particles('♥', 5);
+        commit(`${state.name} leans into the gentle pets.`);
+      } else if (kind === 'rub') {
+        state.happiness += 7;
+        react('pet-react', 820, 'pet-face');
+        particles('♡', 6);
+        commit(`${state.name} melts into the rub.`);
+      } else if (kind === 'squish') {
+        state.happiness += 2;
+        react('hold-react', 760);
+        particles('•', 5, 'squish-dot');
+        commit(`${state.name} squishes like jelly.`);
+      } else if (kind === 'tap') {
+        singleTap();
+      } else if (kind === 'double') {
+        doubleTap();
+      } else if (kind === 'pickup') {
         state.happiness += 2;
         react('double-react', 650);
-        particles('○', 4, 'ripple');
-        commit(`Pick ${state.name} up directly and toss gently!`);
+        particles('↟', 4, 'ripple');
+        commit(`Pick ${state.name} up and toss gently in the playground.`);
       }
-      window.setTimeout(closeCare, 620);
     });
   });
 
-  function homeAction(kind) {
+  function homeAction(kind, button) {
+    selectOption(button);
     if (kind === 'bed') {
-      commit(actions.rest());
+      if (state.energy >= 97) {
+        react('tap-react', 420);
+        commit(`${state.name} is too awake for bed.`);
+        return;
+      }
+      state.energy += 22;
+      state.fullness -= 3;
+      replayFx(els.sleepFx, 'show', 1550);
+      react('rest-react', 1450);
+      commit(`${state.name} curls up in bed... zzz.`);
     } else if (kind === 'house') {
       state.energy += 10;
       state.happiness += 3;
       state.fullness -= 1;
-      replayFx(els.sleepFx, 'show', 1200);
       react('rest-react', 1150);
-      commit(`${state.name} curls up safely inside the little house.`);
+      particles('⌂', 4, 'house-dot');
+      commit(`${state.name} hides safely inside the little house.`);
     } else {
       state.energy += 7;
       state.happiness += 4;
-      react('rest-react', 950);
+      react('pet-react', 900, 'pet-face');
+      particles('~', 5, 'cushion-dot');
       commit(`${state.name} relaxes on the comfy cushion.`);
     }
-    window.setTimeout(closeCare, 760);
   }
 
   document.querySelectorAll('[data-home]').forEach(button => {
-    button.addEventListener('click', () => homeAction(button.dataset.home));
+    button.addEventListener('click', () => homeAction(button.dataset.home, button));
   });
 })();
