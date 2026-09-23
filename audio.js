@@ -1,6 +1,8 @@
 (() => {
   const SFX_KEY = 'petslime-sfx-v1';
+  const SFX_VOL_KEY = 'petslime-sfx-volume-v1';
   let enabled = localStorage.getItem(SFX_KEY) !== 'off';
+  let sfxVolume = Math.max(0, Math.min(100, Number(localStorage.getItem(SFX_VOL_KEY) ?? 65) || 65));
   let ctx = null;
   let master = null;
   let lastSlimeTap = 0;
@@ -14,7 +16,7 @@
       if (!ctx) {
         ctx = new AudioCtx();
         master = ctx.createGain();
-        master.gain.value = 0.18;
+        master.gain.value = 0.18 * (sfxVolume / 65);
         master.connect(ctx.destination);
       }
       if (ctx.state === 'suspended') ctx.resume().catch(() => {});
@@ -162,7 +164,14 @@
     }
   }
 
+  function setSfxVolume(value) {
+    sfxVolume = Math.max(0, Math.min(100, Number(value) || 0));
+    localStorage.setItem(SFX_VOL_KEY, String(sfxVolume));
+    if (master) master.gain.value = 0.18 * (sfxVolume / 65);
+  }
+
   window.petSfx = sfx;
+  window.petSfxSetVolume = setSfxVolume;
 
   function addToggle() {
     const menu = document.getElementById('settings-menu');
@@ -174,6 +183,29 @@
     update();
     const howto = document.getElementById('howto');
     menu.insertBefore(button, howto || null);
+
+    const wrap = document.createElement('div');
+    wrap.className = 'audio-range';
+    const label = document.createElement('label');
+    const title = document.createElement('span');
+    const value = document.createElement('span');
+    title.textContent = 'SFX volume';
+    value.textContent = `${sfxVolume}%`;
+    label.append(title, value);
+    const range = document.createElement('input');
+    range.type = 'range';
+    range.min = '0';
+    range.max = '100';
+    range.step = '1';
+    range.value = String(sfxVolume);
+    range.setAttribute('aria-label', 'Sound effects volume');
+    range.addEventListener('input', () => {
+      setSfxVolume(range.value);
+      value.textContent = `${sfxVolume}%`;
+    });
+    wrap.append(label, range);
+    menu.insertBefore(wrap, howto || null);
+
     button.addEventListener('click', () => {
       enabled = !enabled;
       localStorage.setItem(SFX_KEY, enabled ? 'on' : 'off');
