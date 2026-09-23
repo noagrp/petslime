@@ -11,7 +11,13 @@ const defaults = () => ({
 const els = {
   name: document.getElementById("pet-name"),
   message: document.getElementById("message"),
+  stage: document.getElementById("stage"),
   slime: document.getElementById("slime"),
+  shadow: document.getElementById("slime-shadow"),
+  fx: document.getElementById("fx-layer"),
+  food: document.getElementById("food"),
+  toy: document.getElementById("toy"),
+  sleepFx: document.getElementById("sleep-fx"),
   happiness: document.getElementById("happiness"),
   fullness: document.getElementById("fullness"),
   energy: document.getElementById("energy"),
@@ -22,6 +28,7 @@ const els = {
 };
 
 const clamp = value => Math.max(0, Math.min(100, Math.round(value)));
+const clampRange = (value, min, max) => Math.max(min, Math.min(max, value));
 
 function loadState() {
   try {
@@ -33,6 +40,11 @@ function loadState() {
 }
 
 let state = loadState();
+let pos = { x: 0, y: 0 };
+let animationTimer = 0;
+let throwFrame = 0;
+let tapTimer = 0;
+let lastTapAt = 0;
 
 function applyOfflineDecay() {
   const now = Date.now();
@@ -82,36 +94,234 @@ function render(message = defaultMessage()) {
   updateMoodClass();
 }
 
-function boop() {
-  els.slime.classList.remove("boop");
+function setPosition(x = pos.x, y = pos.y, rotation = 0) {
+  pos.x = x;
+  pos.y = y;
+  els.slime.style.setProperty("--x", `${x}px`);
+  els.slime.style.setProperty("--y", `${y}px`);
+  els.slime.style.setProperty("--rot", `${rotation}deg`);
+
+  const lift = Math.max(0, -y);
+  els.shadow.style.setProperty("--shadow-x", `${x}px`);
+  els.shadow.style.setProperty("--shadow-scale", String(clampRange(1 - lift / 340, .55, 1)));
+  els.shadow.style.setProperty("--shadow-opacity", String(clampRange(.9 - lift / 210, .18, .9)));
+}
+
+function bounds() {
+  const stage = els.stage.getBoundingClientRect();
+  const slime = els.slime.getBoundingClientRect();
+  return {
+    minX: -(stage.width / 2 - slime.width / 2 - 8),
+    maxX: stage.width / 2 - slime.width / 2 - 8,
+    minY: -(stage.height - slime.height - 50),
+    maxY: 0
+  };
+}
+
+function stopThrow() {
+  if (throwFrame) cancelAnimationFrame(throwFrame);
+  throwFrame = 0;
+}
+
+function clearReactionClasses() {
+  els.slime.classList.remove(
+    "idle", "tap-react", "double-react", "hold-react", "pet-react",
+    "feed-react", "play-react", "rest-react", "pet-face", "dragging"
+  );
+}
+
+function react(className, duration = 650, extraClass = "") {
+  stopThrow();
+  window.clearTimeout(animationTimer);
+  clearReactionClasses();
   void els.slime.offsetWidth;
-  els.slime.classList.add("boop");
-  window.setTimeout(() => els.slime.classList.remove("boop"), 420);
+  if (extraClass) els.slime.classList.add(extraClass);
+  els.slime.classList.add(className);
+
+  animationTimer = window.setTimeout(() => {
+    els.slime.classList.remove(className);
+    if (extraClass) els.slime.classList.remove(extraClass);
+    els.slime.classList.add("idle");
+  }, duration);
+}
+
+function replayFx(element, className = "show", duration = 1400) {
+  element.classList.remove(className);
+  void element.offsetWidth;
+  element.classList.add(className);
+  window.setTimeout(() => element.classList.remove(className), duration);
+}
+
+function particles(symbol, count = 4) {
+  const stageRect = els.stage.getBoundingClientRect();
+  const slimeRect = els.slime.getBoundingClientRect();
+  const cx = slimeRect.left - stageRect.left + slimeRect.width / 2;
+  const cy = slimeRect.top - stageRect.top + slimeRect.height * .3;
+
+  for (let i = 0; i < count; i += 1) {
+    const particle = document.createElement("span");
+    particle.className = "particle";
+    particle.textContent = symbol;
+    particle.style.left = `${cx + (Math.random() - .5) * 65}px`;
+    particle.style.top = `${cy + (Math.random() - .5) * 25}px`;
+    particle.style.setProperty("--drift", `${(Math.random() - .5) * 45}px`);
+    particle.style.setProperty("--spin", `${(Math.random() - .5) * 45}deg`);
+    particle.style.fontSize = `${.8 + Math.random() * .55}rem`;
+    els.fx.appendChild(particle);
+    window.setTimeout(() => particle.remove(), 900);
+  }
+}
+
+function commit(message) {
+  render(message);
+  saveState();
+}
+
+function singleTap() {
+  state.happiness += 2;
+  react("tap-react", 420);
+  particles("·", 4);
+  commit(`${state.name} gives a tiny bloop.`);
+}
+
+function doubleTap() {
+  state.happiness += 4;
+  react("double-react", 660);
+  particles("✨", 5);
+  commit(`${state.name} jumps with excitement!`);
+}
+
+function queueTap() {
+  const now = Date.now();
+  if (now - lastTapAt < 285) {
+    window.clearTimeout(tapTimer);
+    tapTimer = 0;
+    lastTapAt = 0;
+    doubleTap();
+    return;
+  }
+
+  lastTapAt = now;
+  tapTimer = window.setTimeout(() => {
+    lastTapAt = 0;
+    singleTap();
+  }, 290);
+}
+
+function holdReaction() {
+  state.happiness += 2;
+  react("hold-react", 650);
+  commit(`${state.name} squishes like jelly.`);
+}
+
+function petReaction(amount = 6) {
+  state.happiness += amount;
+  react("pet-react", 720, "pet-face");
+  particles("♥", 5);
+  commit(`${state.name} melts into the pets.`);
+}
+
+function throwSlime(vx, vy) {
+  stopThrow();
+  clearReactionClasses();
+  let x = pos.x;
+  let y = pos.y;
+  let velocityX = clampRange(vx * 17, -14, 14);
+  let velocityY = clampRange(vy * 17, -16, 10);
+  let last = performance.now();
+  let bounces = 0;
+
+  const frame = now => {
+    const dt = Math.min(32, now - last) / 16.667;
+    last = now;
+    const b = bounds();
+
+    velocityY += .78 * dt;
+    x += velocityX * dt;
+    y += velocityY * dt;
+
+    if (x < b.minX || x > b.maxX) {
+      x = clampRange(x, b.minX, b.maxX);
+      velocityX *= -.55;
+      bounces += 1;
+    }
+
+    if (y < b.minY) {
+      y = b.minY;
+      velocityY *= -.35;
+    }
+
+    if (y >= 0) {
+      y = 0;
+      if (Math.abs(velocityY) > 2.2 && bounces < 4) {
+        velocityY *= -.38;
+        velocityX *= .76;
+        bounces += 1;
+      } else {
+        velocityY = 0;
+        velocityX *= .72;
+      }
+    }
+
+    const rotation = clampRange(velocityX * 1.15, -12, 12);
+    setPosition(x, y, rotation);
+
+    if ((Math.abs(velocityX) > .35 || y < 0 || Math.abs(velocityY) > .4) && bounces < 7) {
+      throwFrame = requestAnimationFrame(frame);
+    } else {
+      setPosition(x, 0, 0);
+      els.slime.classList.add("idle");
+      react("tap-react", 420);
+      particles("·", 3);
+    }
+  };
+
+  throwFrame = requestAnimationFrame(frame);
 }
 
 const actions = {
   feed() {
-    if (state.fullness >= 96) return `${state.name} is already completely full.`;
+    if (state.fullness >= 96) {
+      react("tap-react", 420);
+      return `${state.name} is already completely full.`;
+    }
     state.fullness += 18;
     state.happiness += 3;
-    return "Yum! That hit the spot.";
+    replayFx(els.food, "show", 1100);
+    react("feed-react", 1100);
+    window.setTimeout(() => particles("♥", 3), 650);
+    return "Yum! Mochi scoots over for the strawberry.";
   },
   play() {
-    if (state.energy < 10) return `${state.name} is too sleepy to play right now.`;
+    if (state.energy < 10) {
+      react("rest-react", 850);
+      replayFx(els.sleepFx, "show", 1200);
+      return `${state.name} is too sleepy to play right now.`;
+    }
     state.happiness += 16;
     state.energy -= 10;
     state.fullness -= 4;
-    return "Wheee! Again!";
+    replayFx(els.toy, "show", 1300);
+    react("play-react", 1250);
+    window.setTimeout(() => particles("✨", 4), 620);
+    return `${state.name} chases the yarn!`;
   },
   rest() {
-    if (state.energy >= 97) return `${state.name} is wide awake already.`;
+    if (state.energy >= 97) {
+      react("double-react", 650);
+      return `${state.name} is much too awake for a nap.`;
+    }
     state.energy += 22;
     state.fullness -= 3;
-    return "A tiny slime nap... zzz.";
+    replayFx(els.sleepFx, "show", 1550);
+    react("rest-react", 1450);
+    return `${state.name} settles down... zzz.`;
   },
   pet() {
     state.happiness += 8;
-    return `${state.name} wiggles happily.`;
+    react("pet-react", 720, "pet-face");
+    particles("♥", 6);
+    return `${state.name} wiggles happily under your hand.`;
   }
 };
 
@@ -119,27 +329,168 @@ document.querySelectorAll("[data-action]").forEach(button => {
   button.addEventListener("click", () => {
     const action = button.dataset.action;
     if (!actions[action]) return;
-    const message = actions[action]();
-    boop();
-    render(message);
-    saveState();
+    commit(actions[action]());
   });
 });
 
-els.slime.addEventListener("click", () => {
-  state.happiness += 4;
-  boop();
-  render(`${state.name} says: bloop!`);
-  saveState();
+let gesture = null;
+
+els.slime.addEventListener("pointerdown", event => {
+  if (event.button !== undefined && event.button !== 0) return;
+  event.preventDefault();
+  stopThrow();
+  window.clearTimeout(animationTimer);
+  clearReactionClasses();
+  els.slime.setPointerCapture?.(event.pointerId);
+
+  gesture = {
+    id: event.pointerId,
+    startX: event.clientX,
+    startY: event.clientY,
+    baseX: pos.x,
+    baseY: pos.y,
+    lastX: event.clientX,
+    lastY: event.clientY,
+    lastTime: performance.now(),
+    vx: 0,
+    vy: 0,
+    startedAt: performance.now(),
+    dragging: false,
+    petting: false,
+    holdTriggered: false,
+    reversals: 0,
+    lastDirection: 0,
+    holdTimer: 0
+  };
+
+  gesture.holdTimer = window.setTimeout(() => {
+    if (!gesture || gesture.dragging || gesture.petting) return;
+    gesture.holdTriggered = true;
+    els.slime.classList.add("hold-react");
+    els.message.textContent = `${state.name} is being gently squished...`;
+  }, 500);
+});
+
+els.slime.addEventListener("pointermove", event => {
+  if (!gesture || event.pointerId !== gesture.id) return;
+  event.preventDefault();
+
+  const now = performance.now();
+  const elapsed = now - gesture.startedAt;
+  const dx = event.clientX - gesture.startX;
+  const dy = event.clientY - gesture.startY;
+  const distance = Math.hypot(dx, dy);
+  const dt = Math.max(1, now - gesture.lastTime);
+  gesture.vx = (event.clientX - gesture.lastX) / dt;
+  gesture.vy = (event.clientY - gesture.lastY) / dt;
+
+  if (gesture.holdTriggered && distance > 5) {
+    gesture.petting = true;
+    gesture.holdTriggered = false;
+    els.slime.classList.remove("hold-react");
+  }
+
+  if (!gesture.dragging && !gesture.petting) {
+    if (elapsed >= 180 && elapsed < 500 && Math.abs(dx) >= 6 && Math.abs(dx) < 48 && Math.abs(dy) < 28) {
+      gesture.petting = true;
+      window.clearTimeout(gesture.holdTimer);
+      els.slime.classList.add("pet-face");
+      els.message.textContent = `${state.name} likes that...`;
+    } else if (distance > 9 && elapsed < 500) {
+      gesture.dragging = true;
+      window.clearTimeout(gesture.holdTimer);
+      els.slime.classList.add("dragging");
+      els.message.textContent = `You picked ${state.name} up!`;
+    }
+  }
+
+  if (gesture.petting) {
+    const stepX = event.clientX - gesture.lastX;
+    const direction = Math.sign(stepX);
+    if (direction && gesture.lastDirection && direction !== gesture.lastDirection && Math.abs(stepX) > 1.5) {
+      gesture.reversals += 1;
+      if (gesture.reversals === 2 || gesture.reversals === 5) particles("♥", 2);
+    }
+    if (direction) gesture.lastDirection = direction;
+  }
+
+  if (gesture.dragging) {
+    const b = bounds();
+    const x = clampRange(gesture.baseX + dx, b.minX, b.maxX);
+    const y = clampRange(gesture.baseY + dy, b.minY, b.maxY);
+    const rotation = clampRange(gesture.vx * 28, -12, 12);
+    setPosition(x, y, rotation);
+  }
+
+  gesture.lastX = event.clientX;
+  gesture.lastY = event.clientY;
+  gesture.lastTime = now;
+});
+
+function finishGesture(event) {
+  if (!gesture || event.pointerId !== gesture.id) return;
+  event.preventDefault();
+  window.clearTimeout(gesture.holdTimer);
+  const current = gesture;
+  gesture = null;
+
+  if (current.dragging) {
+    els.slime.classList.remove("dragging");
+    state.happiness += 2;
+    render(Math.abs(current.vx) + Math.abs(current.vy) > .35 ? `${state.name} goes flying!` : `${state.name} lands with a wobble.`);
+    saveState();
+    throwSlime(current.vx, current.vy);
+    return;
+  }
+
+  if (current.petting) {
+    els.slime.classList.remove("pet-face", "hold-react");
+    petReaction(current.reversals >= 2 ? 7 : 4);
+    return;
+  }
+
+  if (current.holdTriggered) {
+    els.slime.classList.remove("hold-react");
+    holdReaction();
+    return;
+  }
+
+  queueTap();
+}
+
+els.slime.addEventListener("pointerup", finishGesture);
+els.slime.addEventListener("pointercancel", event => {
+  if (!gesture || event.pointerId !== gesture.id) return;
+  window.clearTimeout(gesture.holdTimer);
+  gesture = null;
+  clearReactionClasses();
+  els.slime.classList.add("idle");
+});
+
+els.slime.addEventListener("keydown", event => {
+  if (event.key === "Enter" || event.key === " ") {
+    event.preventDefault();
+    queueTap();
+  }
 });
 
 els.reset.addEventListener("click", () => {
   state = defaults();
+  pos = { x: 0, y: 0 };
+  setPosition(0, 0, 0);
   saveState();
   render("A fresh little slime has arrived.");
-  boop();
+  react("double-react", 660);
+  particles("✨", 5);
+});
+
+window.addEventListener("resize", () => {
+  const b = bounds();
+  setPosition(clampRange(pos.x, b.minX, b.maxX), clampRange(pos.y, b.minY, 0), 0);
 });
 
 applyOfflineDecay();
+setPosition(0, 0, 0);
+els.slime.classList.add("idle");
 render();
 saveState();
