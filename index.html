@@ -7,6 +7,93 @@
   <meta name="description" content="A tiny interactive slime pet that lives in your browser.">
   <title>Pet Slime</title>
   <link rel="stylesheet" href="styles.css">
+  <style>
+    .play-panel,
+    .stage {
+      min-height: 360px;
+      height: 360px;
+    }
+
+    .floating-settings {
+      position: absolute;
+      right: 12px;
+      bottom: 12px;
+      z-index: 30;
+      pointer-events: none;
+    }
+
+    .floating-settings .settings-toggle {
+      position: relative;
+      width: 34px;
+      height: 34px;
+      margin: 0 0 0 auto;
+      pointer-events: auto;
+      font-size: 1.15rem;
+      background: rgba(255,255,255,.76);
+      box-shadow: 0 6px 18px rgba(46,91,69,.12);
+    }
+
+    .floating-settings .settings-menu {
+      position: absolute;
+      right: 0;
+      bottom: 43px;
+      width: 176px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+      backdrop-filter: none;
+      pointer-events: auto;
+    }
+
+    .floating-settings .settings-menu[hidden] { display: none; }
+
+    .floating-settings .settings-menu button {
+      width: 100%;
+      margin-top: 6px;
+      padding: 9px 11px;
+      border: 1px solid rgba(255,255,255,.84);
+      border-radius: 14px;
+      background: rgba(255,255,255,.82);
+      box-shadow: 0 8px 22px rgba(52,94,74,.10);
+      backdrop-filter: blur(14px);
+      text-align: left;
+    }
+
+    .floating-settings .howto-panel {
+      margin: 6px 0 0;
+      padding: 10px 11px;
+      border: 1px solid rgba(255,255,255,.84);
+      border-radius: 14px;
+      background: rgba(255,255,255,.88);
+      box-shadow: 0 8px 22px rgba(52,94,74,.10);
+      backdrop-filter: blur(14px);
+    }
+
+    @media (max-width: 420px) {
+      .play-panel,
+      .stage {
+        min-height: 330px;
+        height: 330px;
+      }
+
+      .floating-settings {
+        right: 8px;
+        bottom: 8px;
+      }
+
+      .floating-settings .settings-toggle {
+        width: 32px;
+        height: 32px;
+        font-size: 1.05rem;
+      }
+
+      .floating-settings .settings-menu {
+        width: min(168px, 58vw);
+        bottom: 40px;
+      }
+    }
+  </style>
 </head>
 <body>
   <main class="app" aria-labelledby="pet-name">
@@ -31,6 +118,22 @@
             <span class="mouth" aria-hidden="true"></span>
           </div>
           <span id="slime-shadow" class="slime-shadow" aria-hidden="true"></span>
+        </div>
+
+        <div class="floating-settings" aria-label="Pet settings">
+          <div id="settings-menu" class="settings-menu" hidden>
+            <button id="rename" type="button">Rename</button>
+            <button id="slime-color" type="button">Slime color</button>
+            <button id="background" type="button">Background</button>
+            <button id="howto" type="button" aria-expanded="false">How to</button>
+            <div id="howto-panel" class="howto-panel" hidden>
+              <strong>Play with your slime</strong>
+              <span>Tap · double tap · hold · rub · drag · toss</span>
+              <span>Feed, play, rest, and pet buttons each have their own reaction.</span>
+            </div>
+            <button id="reset" type="button">Reset</button>
+          </div>
+          <button id="settings-toggle" class="settings-toggle" type="button" aria-label="Open settings" aria-expanded="false">+</button>
         </div>
       </section>
 
@@ -57,22 +160,6 @@
           <button type="button" data-action="pet"><span class="action-icon">💚</span><span>Pet</span></button>
         </section>
       </section>
-
-      <footer class="settings-footer" aria-label="Pet settings">
-        <div id="settings-menu" class="settings-menu" hidden>
-          <button id="rename" type="button">Rename</button>
-          <button id="slime-color" type="button">Slime color</button>
-          <button id="background" type="button">Background</button>
-          <button id="howto" type="button" aria-expanded="false">How to</button>
-          <button id="reset" type="button">Reset</button>
-        </div>
-        <div id="howto-panel" class="howto-panel" hidden>
-          <strong>Play with your slime</strong>
-          <span>Tap · double tap · hold · rub · drag · toss</span>
-          <span>Feed, play, rest, and pet buttons each have their own reaction.</span>
-        </div>
-        <button id="settings-toggle" class="settings-toggle" type="button" aria-label="Open settings" aria-expanded="false">+</button>
-      </footer>
     </section>
   </main>
 
