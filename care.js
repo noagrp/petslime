@@ -100,7 +100,35 @@
   function startAction(button,cls,duration,message,shadowKind=cls.replace('play-','')){clearTimers();clearAction();selectOption(button);stopThrow();clearReactionClasses();void els.slime.offsetWidth;els.slime.classList.add(cls);shadow(shadowKind,duration);commit(message);activityTimer=setTimeout(()=>{els.slime.classList.remove(cls);els.slime.classList.add('idle')},duration)}
 
   const foodInfo={'🍓':['strawberry','•','food-crumb'],'🍏':['green apple','●','apple-bit'],'🍪':['cookie','▪','cookie-bit'],'🍇':['grapes','●','grape-bit'],'🍉':['watermelon','◆','melon-bit'],'🥕':['carrot','▲','carrot-bit']};
-  function eat(symbol,button){const info=foodInfo[symbol];if(state.fullness>=96){react('tap-react',420);commit(`${state.name} is already completely full.`);return}selectOption(button);els.food.textContent=symbol;state.fullness+=18;state.happiness+=3;replayFx(els.food,'show',1100);react('feed-react',1100);shadow('feed',1100);later(()=>particles(info[1],5,info[2]),620);commit(`Yum! ${state.name} munches the ${info[0]}.`)}
+  function eat(symbol,button){
+    const info=foodInfo[symbol];
+    if(state.fullness>=96){
+      react('tap-react',420);
+      commit(`${state.name} is already completely full.`);
+      return;
+    }
+    clearTimers();
+    clearAction();
+    stopThrow();
+    clearReactionClasses();
+    selectOption(button);
+    els.food.classList.remove('show');
+    els.food.textContent=symbol;
+    void els.food.offsetWidth;
+    void els.slime.offsetWidth;
+    state.fullness+=18;
+    state.happiness+=3;
+    els.food.classList.add('show');
+    els.slime.classList.add('feed-react');
+    shadow('feed',1200);
+    later(()=>particles(info[1],5,info[2]),620);
+    activityTimer=setTimeout(()=>{
+      els.slime.classList.remove('feed-react');
+      els.slime.classList.add('idle');
+      els.food.classList.remove('show');
+    },1200);
+    commit(`Yum! ${state.name} munches the ${info[0]}.`);
+  }
   document.querySelectorAll('[data-food]').forEach(b=>b.addEventListener('click',()=>eat(b.dataset.food,b)));
 
   document.querySelectorAll('[data-play]').forEach(button=>button.addEventListener('click',()=>{
