@@ -1,7 +1,10 @@
 (() => {
   const ENABLE_KEY='petslime-bgm-v1';
   const VOL_KEY='petslime-bgm-volume-v1';
-  const MANIFEST='bgm/tracks.json';
+  const CACHE_KEY='petslime-bgm-catalog-v1';
+  const API_URL='https://api.github.com/repos/noagrp/petslime/contents/bgm';
+  const AUDIO_PATTERN=/\.(mp3|m4a|aac|ogg|wav|flac)$/i;
+  const CACHE_MS=30*60*1000;
   let enabled=localStorage.getItem(ENABLE_KEY)!=='off';
   let volume=Math.max(0,Math.min(40,Number(localStorage.getItem(VOL_KEY)??12)||12));
   let activated=false;
@@ -16,56 +19,88 @@
   audio.preload='metadata';
   audio.volume=volume/100;
 
-  function sourceFor(name){return `bgm/${name}`}
   function updatePlayer(){
     if(playButton) playButton.textContent=audio.paused?'▶':'❚❚';
     if(trackLabel) trackLabel.textContent=tracks.length?`${index+1}/${tracks.length}`:'0/0';
   }
+
   function loadTrack(nextIndex,autoplay=false){
     if(!tracks.length)return;
     index=Math.max(0,Math.min(tracks.length-1,nextIndex));
     finished=false;
-    audio.src=sourceFor(tracks[index]);
+    audio.src=tracks[index].url;
     audio.load();
     updatePlayer();
     if(autoplay&&activated&&enabled&&!document.hidden)audio.play().catch(()=>{});
   }
+
   function play(){
     if(!tracks.length||!activated||document.hidden)return;
-    if(finished){loadTrack(0,false)}
+    if(finished)loadTrack(0,false);
     enabled=true;
     localStorage.setItem(ENABLE_KEY,'on');
     audio.play().catch(()=>{});
     updatePlayer();
   }
+
   function pause(){audio.pause();updatePlayer()}
   function activate(){if(activated)return;activated=true;if(enabled)play()}
   function setVolume(v){volume=Math.max(0,Math.min(40,Number(v)||0));audio.volume=volume/100;localStorage.setItem(VOL_KEY,String(volume))}
   function duck(ms=6500){clearTimeout(duckTimer);const normal=volume/100;audio.volume=Math.min(normal,.06);duckTimer=setTimeout(()=>{audio.volume=volume/100},ms)}
+
   function previous(){
     if(!tracks.length||index<=0)return;
     const wasPlaying=!audio.paused;
     loadTrack(index-1,wasPlaying);
   }
+
   function next(){
     if(!tracks.length)return;
     if(index>=tracks.length-1){pause();return}
     const wasPlaying=!audio.paused;
     loadTrack(index+1,wasPlaying);
   }
+
   function togglePlay(){
     activated=true;
     if(audio.paused)play();
     else{enabled=false;localStorage.setItem(ENABLE_KEY,'off');pause()}
   }
 
-  async function loadManifest(){
+  function readCachedTracks(){
     try{
-      const response=await fetch(`${MANIFEST}?v=20260923-28`,{cache:'no-store'});
-      const list=await response.json();
-      tracks=Array.isArray(list)?list.filter(name=>typeof name==='string'&&/\.mp3$/i.test(name)):[];
-    }catch{}
-    if(!tracks.length)tracks=['petslime-main-song.mp3'];
+      const cached=JSON.parse(localStorage.getItem(CACHE_KEY)||'null');
+      if(!cached||!Array.isArray(cached.tracks)||Date.now()-Number(cached.savedAt||0)>CACHE_MS)return [];
+      return cached.tracks.filter(track=>track&&typeof track.name==='string'&&typeof track.url==='string'&&AUDIO_PATTERN.test(track.name));
+    }catch{return []}
+  }
+
+  function saveCachedTracks(list){
+    try{localStorage.setItem(CACHE_KEY,JSON.stringify({savedAt:Date.now(),tracks:list}))}catch{}
+  }
+
+  async function discoverTracks(){
+    const cached=readCachedTracks();
+    if(cached.length)return cached;
+    const response=await fetch(API_URL,{headers:{Accept:'application/vnd.github+json'}});
+    if(!response.ok)throw new Error(`GitHub returned ${response.status}`);
+    const items=await response.json();
+    const discovered=(Array.isArray(items)?items:[])
+      .filter(item=>item&&item.type==='file'&&AUDIO_PATTERN.test(item.name)&&item.download_url)
+      .sort((a,b)=>a.name.localeCompare(b.name))
+      .map(item=>({name:item.name,url:item.download_url}));
+    if(discovered.length)saveCachedTracks(discovered);
+    return discovered;
+  }
+
+  async function loadCatalog(){
+    try{tracks=await discoverTracks()}catch(error){console.warn('Could not scan the BGM folder.',error)}
+    if(!tracks.length){
+      tracks=[
+        {name:'petslime-bubblegum.mp3',url:'bgm/petslime-bubblegum.mp3'},
+        {name:'petslime-main-song.mp3',url:'bgm/petslime-main-song.mp3'}
+      ];
+    }
     loadTrack(0,false);
     if(activated&&enabled)play();
   }
@@ -128,15 +163,15 @@
   audio.addEventListener('play',updatePlayer);
   audio.addEventListener('pause',updatePlayer);
   audio.addEventListener('ended',()=>{
-    if(index<tracks.length-1){loadTrack(index+1,true)}
+    if(index<tracks.length-1)loadTrack(index+1,true);
     else{finished=true;pause()}
   });
   ['pointerdown','keydown','touchstart'].forEach(type=>document.addEventListener(type,activate,{once:true,passive:true}));
   document.addEventListener('visibilitychange',()=>{document.hidden?pause():(enabled&&!finished&&play())});
   document.querySelector('[data-home="music"]')?.addEventListener('click',()=>{duck(6500);setTimeout(()=>window.petSfx?.('chime'),480)});
-  window.petBgm={play,pause,setVolume,duck,previous,next,get tracks(){return [...tracks]},get index(){return index},get source(){return tracks[index]?sourceFor(tracks[index]):''}};
+  window.petBgm={play,pause,setVolume,duck,previous,next,get tracks(){return tracks.map(track=>track.name)},get index(){return index},get source(){return tracks[index]?.url||''}};
   moveSettings();
   bindSettingsToggle();
   addControls();
-  loadManifest();
+  loadCatalog();
 })();
