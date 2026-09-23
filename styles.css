@@ -226,11 +226,12 @@ h1 {
 .food {
   left: 50%;
   bottom: 67px;
-  z-index: 3;
+  z-index: 6;
   font-size: 2rem;
   opacity: 0;
-  transform: translateX(88px) scale(.5);
+  transform: translateX(100px) scale(.5);
   pointer-events: none;
+  filter: drop-shadow(0 4px 4px rgba(55,70,60,.16));
 }
 .food.show { animation: foodServe 1.05s ease both; }
 
@@ -391,10 +392,13 @@ progress::-moz-progress-bar { background: #55c987; border-radius: 999px; }
   100% { transform: translate3d(var(--x), calc(var(--y) + 14px), 0) scale(1.16,.74); }
 }
 @keyframes foodServe {
-  0% { opacity: 0; transform: translateX(100px) translateY(-12px) scale(.5) rotate(-15deg); }
-  20%,72% { opacity: 1; transform: translateX(88px) translateY(0) scale(1) rotate(0); }
-  88% { opacity: 1; transform: translateX(54px) translateY(4px) scale(.72); }
-  100% { opacity: 0; transform: translateX(42px) translateY(8px) scale(.15); }
+  0% { opacity: 0; transform: translateX(106px) translateY(-13px) scale(.45) rotate(-15deg); }
+  18% { opacity: 1; transform: translateX(92px) translateY(0) scale(1.05) rotate(0); }
+  55% { opacity: 1; transform: translateX(88px) translateY(0) scale(1) rotate(0); }
+  76% { opacity: 1; transform: translateX(60px) translateY(2px) scale(.98) rotate(-8deg); }
+  89% { opacity: 1; transform: translateX(42px) translateY(3px) scale(.92) rotate(0); }
+  96% { opacity: 1; transform: translateX(42px) translateY(5px) scale(.38) rotate(8deg); }
+  100% { opacity: 0; transform: translateX(42px) translateY(7px) scale(0) rotate(10deg); }
 }
 @keyframes toyBounce {
   0% { opacity: 0; transform: translateX(0) translateY(-25px) scale(.5); }
