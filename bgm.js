@@ -30,6 +30,7 @@
       toggle.classList.toggle('open',open);
       toggle.setAttribute('aria-expanded',String(open));
       toggle.setAttribute('aria-label',open?'Close settings':'Open settings');
+      if(open) menu.scrollTop=0;
     },true);
   }
 
@@ -38,7 +39,7 @@
     if(!menu||document.getElementById('background-music'))return;
     const anchor=document.getElementById('howto');
     const style=document.createElement('style');
-    style.textContent='.audio-range{margin-top:6px;padding:9px 11px;border:1px solid rgba(255,255,255,.84);border-radius:14px;background:rgba(255,255,255,.86);box-shadow:0 8px 22px rgba(52,94,74,.11);backdrop-filter:blur(14px)}.audio-range label{display:flex;justify-content:space-between;gap:8px;margin-bottom:6px;color:#516b5e;font-size:.73rem}.audio-range input{width:100%;accent-color:#55c987}.play-panel{background:rgba(255,255,255,.34)!important;border:1px solid rgba(255,255,255,.68)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 14px 34px rgba(52,94,74,.10)!important;backdrop-filter:blur(18px) saturate(1.08);-webkit-backdrop-filter:blur(18px) saturate(1.08)}.stage{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.015));border-radius:30px}.floating-settings .settings-menu{max-height:min(72vh,520px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;-webkit-overflow-scrolling:touch;padding-right:4px}.floating-settings .settings-menu::-webkit-scrollbar{width:5px}.floating-settings .settings-menu::-webkit-scrollbar-thumb{background:rgba(74,111,93,.24);border-radius:999px}';
+    style.textContent='.audio-range{margin-top:6px;padding:9px 11px;border:1px solid rgba(255,255,255,.84);border-radius:14px;background:rgba(255,255,255,.86);box-shadow:0 8px 22px rgba(52,94,74,.11);backdrop-filter:blur(14px)}.audio-range label{display:flex;justify-content:space-between;gap:8px;margin-bottom:6px;color:#516b5e;font-size:.73rem}.audio-range input{width:100%;accent-color:#55c987}.play-panel{background:rgba(255,255,255,.34)!important;border:1px solid rgba(255,255,255,.68)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 14px 34px rgba(52,94,74,.10)!important;backdrop-filter:blur(18px) saturate(1.08);-webkit-backdrop-filter:blur(18px) saturate(1.08)}.stage{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.015));border-radius:30px}.floating-settings .settings-menu{top:43px!important;bottom:auto!important;height:auto!important;min-height:0!important;max-height:min(72vh,290px)!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain;scrollbar-width:thin;-webkit-overflow-scrolling:touch;padding-right:4px!important}.floating-settings .settings-menu:not([hidden]){display:block!important}.floating-settings .settings-menu::-webkit-scrollbar{width:5px}.floating-settings .settings-menu::-webkit-scrollbar-thumb{background:rgba(74,111,93,.24);border-radius:999px}';
     document.head.appendChild(style);
     const toggle=document.createElement('button');
     toggle.id='background-music';toggle.type='button';
