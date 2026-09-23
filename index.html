@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#dff6e8">
   <meta name="description" content="A tiny interactive slime pet that lives in your browser.">
   <title>Pet Slime</title>
-  <link rel="stylesheet" href="styles.css?v=20260923-2">
+  <link rel="stylesheet" href="styles.css?v=20260923-3">
   <style>
     .play-panel,
     .stage {
@@ -75,6 +75,14 @@
       box-shadow: 0 8px 22px rgba(52,94,74,.12);
       backdrop-filter: blur(14px);
       pointer-events: auto;
+    }
+
+    .particle.food-crumb {
+      color: #d96f82;
+      font-size: .72rem !important;
+      font-weight: 900;
+      text-shadow: 0 1px 0 rgba(255,255,255,.45);
+      animation: particleRise .6s ease-out forwards;
     }
 
     @media (max-width: 420px) {
@@ -170,6 +178,6 @@
     </section>
   </main>
 
-  <script src="script.js?v=20260923-2"></script>
+  <script src="script.js?v=20260923-3"></script>
 </body>
 </html>
