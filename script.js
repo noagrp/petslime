@@ -42,6 +42,8 @@ const els = {
   happinessValue: document.getElementById("happiness-value"),
   fullnessValue: document.getElementById("fullness-value"),
   energyValue: document.getElementById("energy-value"),
+  settingsToggle: document.getElementById("settings-toggle"),
+  settingsMenu: document.getElementById("settings-menu"),
   rename: document.getElementById("rename"),
   slimeColor: document.getElementById("slime-color"),
   background: document.getElementById("background"),
@@ -185,14 +187,14 @@ function replayFx(element, className = "show", duration = 1400) {
   window.setTimeout(() => element.classList.remove(className), duration);
 }
 
-function particles(symbol, count = 4) {
+function particles(symbol, count = 4, extraClass = "") {
   const stageRect = els.stage.getBoundingClientRect();
   const slimeRect = els.slime.getBoundingClientRect();
   const cx = slimeRect.left - stageRect.left + slimeRect.width / 2;
   const cy = slimeRect.top - stageRect.top + slimeRect.height * .3;
   for (let i = 0; i < count; i += 1) {
     const particle = document.createElement("span");
-    particle.className = "particle";
+    particle.className = `particle${extraClass ? ` ${extraClass}` : ""}`;
     particle.textContent = symbol;
     particle.style.left = `${cx + (Math.random() - .5) * 65}px`;
     particle.style.top = `${cy + (Math.random() - .5) * 25}px`;
@@ -200,7 +202,7 @@ function particles(symbol, count = 4) {
     particle.style.setProperty("--spin", `${(Math.random() - .5) * 45}deg`);
     particle.style.fontSize = `${.8 + Math.random() * .55}rem`;
     els.fx.appendChild(particle);
-    window.setTimeout(() => particle.remove(), 900);
+    window.setTimeout(() => particle.remove(), 1100);
   }
 }
 
@@ -219,7 +221,7 @@ function singleTap() {
 function doubleTap() {
   state.happiness += 4;
   react("double-react", 660);
-  particles("✨", 5);
+  particles("○", 5, "ripple");
   commit(`${state.name} jumps with excitement!`);
 }
 
@@ -328,7 +330,7 @@ const actions = {
     state.fullness -= 4;
     replayFx(els.toy, "show", 1300);
     react("play-react", 1250);
-    window.setTimeout(() => particles("✨", 4), 620);
+    window.setTimeout(() => particles("♪", 5, "play-note"), 420);
     return `${state.name} chases the yarn!`;
   },
   rest() {
@@ -493,6 +495,17 @@ els.slime.addEventListener("keydown", event => {
   }
 });
 
+function setSettingsOpen(open) {
+  els.settingsMenu.hidden = !open;
+  els.settingsToggle.classList.toggle("open", open);
+  els.settingsToggle.setAttribute("aria-expanded", String(open));
+  els.settingsToggle.setAttribute("aria-label", open ? "Close settings" : "Open settings");
+}
+
+els.settingsToggle.addEventListener("click", () => {
+  setSettingsOpen(els.settingsMenu.hidden);
+});
+
 els.rename.addEventListener("click", () => {
   const next = window.prompt("Give your slime a name:", state.name);
   if (next === null) return;
@@ -502,14 +515,14 @@ els.rename.addEventListener("click", () => {
   saveState();
   render(`${state.name} likes the new name!`);
   react("double-react", 660);
-  particles("✨", 4);
+  particles("○", 4, "ripple");
 });
 
 els.slimeColor.addEventListener("click", () => {
   state.slimeColor = (Number(state.slimeColor) + 1) % SLIME_COLORS.length;
   applyAppearance();
   saveState();
-  react("happyWiggle", 0);
+  react("pet-react", 520);
   render(`${state.name} has a fresh new color.`);
 });
 
@@ -534,7 +547,8 @@ els.reset.addEventListener("click", () => {
   saveState();
   render("A fresh little slime has arrived.");
   react("double-react", 660);
-  particles("✨", 5);
+  particles("○", 5, "ripple");
+  setSettingsOpen(false);
 });
 
 window.addEventListener("resize", () => {
