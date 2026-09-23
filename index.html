@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#dff6e8">
   <meta name="description" content="A tiny interactive slime pet that lives in your browser.">
   <title>Pet Slime</title>
-  <link rel="stylesheet" href="styles.css?v=20260923-12">
+  <link rel="stylesheet" href="styles.css?v=20260923-13">
   <style>
     .panel {
       background:rgba(255,255,255,.44)!important;
@@ -133,26 +133,9 @@
           <button class="care-option" data-food="🥕" aria-label="Carrot" title="Carrot"><span>🥕</span><span>Carrot</span></button>
         </div></section>
 
-        <section id="care-play" class="care-sheet" aria-label="Play choices"><div class="care-grid">
-          <button class="care-option" data-play="bubble" aria-label="Blow bubbles" title="Blow bubbles"><span class="play-mini bubbles-mini"></span><span>Blow bubbles</span></button>
-          <button class="care-option" data-play="jump" aria-label="Jump around" title="Jump around"><span class="play-mini jump-mini"></span><span>Jump around</span></button>
-        </div></section>
-
-        <section id="care-interact" class="care-sheet" aria-label="Command interactions"><div class="care-grid">
-          <button class="care-option" data-interact="highfive" aria-label="High five" title="High five"><span>🖐️</span><span>High five</span></button>
-          <button class="care-option" data-interact="peace" aria-label="Peace" title="Peace"><span>✌️</span><span>Peace</span></button>
-          <button class="care-option" data-interact="wave" aria-label="Wave" title="Wave"><span>👋</span><span>Wave</span></button>
-          <button class="care-option" data-interact="hide" aria-label="Hide" title="Hide"><span>🙈</span><span>Hide</span></button>
-          <button class="care-option" data-interact="dig" aria-label="Dig" title="Dig"><span>⛏️</span><span>Dig</span></button>
-          <button class="care-option" data-interact="dance" aria-label="Dance" title="Dance"><span>💃</span><span>Dance</span></button>
-        </div></section>
-
-        <section id="care-home" class="care-sheet" aria-label="Home and rest choices"><div class="care-grid">
-          <button class="care-option" data-home="tv" aria-label="TV" title="TV"><span>📺</span><span>TV</span></button>
-          <button class="care-option" data-home="game" aria-label="Gaming" title="Gaming"><span>🎮</span><span>Gaming</span></button>
-          <button class="care-option" data-home="shower" aria-label="Shower" title="Shower"><span>🚿</span><span>Shower</span></button>
-          <button class="care-option" data-home="bed" aria-label="Bed" title="Bed"><span>😴</span><span>Bed</span></button>
-        </div></section>
+        <section id="care-play" class="care-sheet" aria-label="Play choices"><div class="care-grid"></div></section>
+        <section id="care-interact" class="care-sheet" aria-label="Command interactions"><div class="care-grid"></div></section>
+        <section id="care-home" class="care-sheet" aria-label="Home and rest choices"><div class="care-grid"></div></section>
 
         <div class="floating-settings" aria-label="Pet settings"><div id="settings-menu" class="settings-menu" hidden><button id="rename" type="button">Rename</button><button id="slime-color" type="button">Slime color</button><button id="background" type="button">Background</button><button id="howto" type="button" aria-expanded="false">How to</button><div id="howto-panel" class="howto-panel" hidden><strong>Free interaction</strong><span>Tap · double tap · hold · rub · drag · toss</span><span>Interact contains commands and tricks instead of duplicate gestures.</span></div><button id="reset" type="button">Reset</button></div><button id="settings-toggle" class="settings-toggle" type="button" aria-label="Open settings" aria-expanded="false">+</button></div>
       </section>
@@ -168,7 +151,7 @@
       </section>
     </section>
   </main>
-  <script src="script.js?v=20260923-12"></script>
-  <script src="care.js?v=20260923-12"></script>
+  <script src="script.js?v=20260923-13"></script>
+  <script src="care.js?v=20260923-13"></script>
 </body>
 </html>
