@@ -5,6 +5,7 @@
   let master = null;
   let lastSlimeTap = 0;
   let dragStart = null;
+  let scheduled = [];
 
   function ensureAudio() {
     try {
@@ -58,6 +59,7 @@
       const gain = ac.createGain();
       filter.type = opts.filter || 'lowpass';
       filter.frequency.value = opts.frequency || 900;
+      if (opts.q) filter.Q.value = opts.q;
       gain.gain.setValueAtTime(opts.volume || .16, ac.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + duration);
       src.buffer = buffer;
@@ -68,11 +70,22 @@
     } catch {}
   }
 
-  function sequence(notes, gap = 70) {
-    notes.forEach((n, i) => setTimeout(() => tone(n.freq, n.duration || .1, n), i * gap));
+  function laterSound(fn, ms) {
+    const id = setTimeout(fn, ms);
+    scheduled.push(id);
+    return id;
   }
 
-  function sfx(name) {
+  function clearScheduled() {
+    scheduled.forEach(clearTimeout);
+    scheduled = [];
+  }
+
+  function sequence(notes, gap = 70) {
+    notes.forEach((n, i) => laterSound(() => tone(n.freq, n.duration || .1, n), i * gap));
+  }
+
+  function sfx(name, variant = 0) {
     if (!enabled) return;
     switch (name) {
       case 'bloop': tone(320, .09, { endFreq: 470, volume: .27 }); break;
@@ -81,13 +94,23 @@
       case 'pet': sequence([{freq:260,duration:.1},{freq:310,duration:.12}], 85); break;
       case 'eat':
         noise(.09, { frequency: 1200, volume: .13 });
-        setTimeout(() => noise(.07, { frequency: 850, volume: .11 }), 85);
+        laterSound(() => noise(.07, { frequency: 850, volume: .11 }), 85);
         break;
-      case 'boing': tone(220, .18, { endFreq: 520, type: 'sine', volume: .3 }); break;
-      case 'whoosh': noise(.18, { filter: 'bandpass', frequency: 1150, volume: .14 }); break;
-      case 'roll':
-        tone(150, .38, { endFreq: 260, type: 'triangle', volume: .2 });
-        setTimeout(() => tone(230, .18, { endFreq: 420, type: 'triangle', volume: .18 }), 390);
+      case 'boing': {
+        const base = 205 + variant * 18;
+        tone(base, .16, { endFreq: base + 285, type: 'sine', volume: .28 });
+        break;
+      }
+      case 'whoosh':
+        noise(.16, { filter: 'bandpass', frequency: 980 + variant * 110, q: 1.1, volume: .13 });
+        break;
+      case 'roll-slow':
+        tone(145, .42, { endFreq: 235, type: 'triangle', volume: .18 });
+        noise(.28, { filter: 'lowpass', frequency: 420, volume: .07 });
+        break;
+      case 'roll-fast':
+        tone(235, .2, { endFreq: 470, type: 'triangle', volume: .17 });
+        noise(.16, { filter: 'bandpass', frequency: 900, volume: .08 });
         break;
       case 'impact':
         tone(115, .08, { endFreq: 80, type: 'triangle', volume: .32 });
@@ -96,17 +119,31 @@
       case 'sparkle': sequence([{freq:760,duration:.07},{freq:980,duration:.09}], 65); break;
       case 'hide':
         tone(360, .08, { endFreq: 260, volume: .2 });
-        setTimeout(() => tone(520, .07, { endFreq: 650, volume: .18 }), 420);
+        laterSound(() => tone(520, .07, { endFreq: 650, volume: .18 }), 420);
         break;
       case 'dig':
         noise(.2, { frequency: 520, volume: .13 });
-        setTimeout(() => noise(.16, { frequency: 430, volume: .1 }), 230);
+        laterSound(() => noise(.16, { frequency: 430, volume: .1 }), 230);
         break;
       case 'bubble':
         tone(520, .13, { endFreq: 760, volume: .16 });
-        setTimeout(() => tone(880, .06, { endFreq: 620, volume: .12 }), 520);
+        laterSound(() => tone(880, .06, { endFreq: 620, volume: .12 }), 520);
         break;
       case 'phone': tone(720, .045, { type: 'square', volume: .1 }); break;
+      case 'tv':
+        tone(118, .16, { endFreq: 92, type: 'triangle', volume: .18 });
+        laterSound(() => tone(238, .07, { endFreq: 210, type: 'square', volume: .08 }), 280);
+        laterSound(() => tone(184, .08, { endFreq: 230, type: 'square', volume: .07 }), 650);
+        laterSound(() => tone(268, .06, { endFreq: 220, type: 'square', volume: .07 }), 980);
+        break;
+      case 'paper':
+        noise(.13, { filter: 'highpass', frequency: 1500, volume: .11 });
+        laterSound(() => noise(.08, { filter: 'bandpass', frequency: 2200, q: .7, volume: .07 }), 95);
+        break;
+      case 'pour':
+        noise(.46, { filter: 'bandpass', frequency: 1250, q: .55, volume: .1 });
+        laterSound(() => noise(.34, { filter: 'highpass', frequency: 2100, volume: .06 }), 110);
+        break;
       case 'chime': sequence([{freq:523,duration:.11},{freq:659,duration:.11},{freq:784,duration:.15}], 95); break;
       case 'sleep': sequence([{freq:260,duration:.16,endFreq:220},{freq:210,duration:.2,endFreq:170}], 150); break;
       case 'land': tone(100, .09, { endFreq: 65, type: 'triangle', volume: .27 }); break;
@@ -129,29 +166,47 @@
       enabled = !enabled;
       localStorage.setItem(SFX_KEY, enabled ? 'on' : 'off');
       update();
+      clearScheduled();
       if (enabled) sfx('chime');
     });
   }
 
+  function playMovement(kind) {
+    clearScheduled();
+    if (kind === 'jump') {
+      [[1020,0],[1850,1],[2740,2],[3680,1],[4440,0]].forEach(([t,v]) => laterSound(() => sfx('boing', v), t));
+    } else if (kind === 'sprint') {
+      [[520,0],[1120,1],[1780,2],[2440,1]].forEach(([t,v]) => laterSound(() => sfx('whoosh', v), t));
+    } else if (kind === 'skip') {
+      [[760,0],[1550,1],[2350,0],[3150,1]].forEach(([t,v]) => laterSound(() => sfx('boing', v), t));
+    } else if (kind === 'dodge') {
+      [[480,0],[1070,1],[1680,2],[2290,1],[2890,0]].forEach(([t,v]) => laterSound(() => sfx('whoosh', v), t));
+    } else if (kind === 'roll') {
+      sfx('roll-slow');
+      laterSound(() => sfx('roll-slow'), 950);
+      laterSound(() => sfx('roll-slow'), 1900);
+      laterSound(() => sfx('roll-fast'), 2650);
+      laterSound(() => sfx('roll-fast'), 3150);
+      laterSound(() => sfx('roll-fast'), 3550);
+    } else if (kind === 'dance') {
+      sfx('chime');
+    }
+  }
+
   function bindActionSounds() {
     document.querySelectorAll('[data-food]').forEach(button => {
-      button.addEventListener('click', () => sfx('eat'));
+      button.addEventListener('click', () => { clearScheduled(); sfx('eat'); });
     });
 
     document.querySelectorAll('[data-play]').forEach(button => {
-      button.addEventListener('click', () => {
-        const kind = button.dataset.play;
-        if (kind === 'jump' || kind === 'skip') sfx('boing');
-        else if (kind === 'sprint' || kind === 'dodge') sfx('whoosh');
-        else if (kind === 'roll') sfx('roll');
-        else if (kind === 'dance') sfx('chime');
-      });
+      button.addEventListener('click', () => playMovement(button.dataset.play));
     });
 
     document.querySelectorAll('[data-interact]').forEach(button => {
       button.addEventListener('click', () => {
+        clearScheduled();
         const kind = button.dataset.interact;
-        if (kind === 'highfive') setTimeout(() => sfx('impact'), 620);
+        if (kind === 'highfive') laterSound(() => sfx('impact'), 620);
         else if (kind === 'peace') sfx('sparkle');
         else if (kind === 'wave') sfx('bloop');
         else if (kind === 'hide') sfx('hide');
@@ -162,12 +217,31 @@
 
     document.querySelectorAll('[data-home]').forEach(button => {
       button.addEventListener('click', () => {
+        clearScheduled();
         const kind = button.dataset.home;
-        if (kind === 'phone') {
+        if (kind === 'tv') {
+          sfx('tv');
+          laterSound(() => sfx('tv'), 2050);
+        } else if (kind === 'phone') {
           sfx('phone');
-          setTimeout(() => sfx('phone'), 850);
-        } else if (kind === 'music') sfx('chime');
-        else if (kind === 'bed') sfx('sleep');
+          laterSound(() => sfx('phone'), 850);
+          laterSound(() => sfx('phone'), 2050);
+          laterSound(() => sfx('phone'), 3350);
+        } else if (kind === 'read') {
+          sfx('paper');
+          laterSound(() => sfx('paper'), 2850);
+        } else if (kind === 'music') {
+          sfx('chime');
+        } else if (kind === 'shower') {
+          sfx('pour');
+          laterSound(() => sfx('pour'), 700);
+          laterSound(() => sfx('pour'), 1450);
+          laterSound(() => sfx('pour'), 2200);
+          laterSound(() => sfx('pour'), 2950);
+          laterSound(() => sfx('pour'), 3650);
+        } else if (kind === 'bed') {
+          sfx('sleep');
+        }
       });
     });
   }
@@ -175,6 +249,7 @@
   const slime = document.getElementById('slime');
   if (slime) {
     slime.addEventListener('pointerdown', event => {
+      clearScheduled();
       dragStart = { x: event.clientX, y: event.clientY, time: performance.now() };
     });
     slime.addEventListener('pointerup', event => {
@@ -186,7 +261,7 @@
       dragStart = null;
       if (distance > 38) {
         sfx('whoosh');
-        setTimeout(() => sfx('land'), 420);
+        laterSound(() => sfx('land'), 420);
         return;
       }
       if (elapsed > 480) {
