@@ -316,7 +316,7 @@ const actions = {
     state.happiness += 3;
     replayFx(els.food, "show", 1100);
     react("feed-react", 1100);
-    window.setTimeout(() => particles("♥", 3), 650);
+    window.setTimeout(() => particles("•", 7, "food-crumb"), 650);
     return `Yum! ${state.name} scoots over for the strawberry.`;
   },
   play() {
