@@ -266,6 +266,19 @@ h1 {
   animation: particleRise .85s ease-out forwards;
 }
 
+.particle.ripple {
+  color: #6da5b7;
+  font-size: 1.05rem !important;
+  font-weight: 700;
+  animation: rippleRise .7s ease-out forwards;
+}
+
+.particle.play-note {
+  color: #9a68b7;
+  font-weight: 800;
+  animation: noteFloat 1s ease-out forwards;
+}
+
 .bottom-panel {
   padding: 17px 18px 18px;
   border-radius: 28px;
@@ -322,33 +335,65 @@ progress::-moz-progress-bar { background: #55c987; border-radius: 999px; }
 .action-icon { font-size: 1.22rem; }
 
 .settings-footer {
-  padding: 4px 4px 0;
-  text-align: center;
+  position: relative;
+  min-height: 48px;
+  padding-top: 2px;
 }
-.settings-row {
-  display: flex;
-  justify-content: center;
-  gap: 5px;
-  flex-wrap: wrap;
-}
-.settings-row button {
-  padding: 7px 9px;
+
+.settings-toggle {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  margin-left: auto;
   border: 0;
-  border-radius: 999px;
-  background: rgba(255,255,255,.52);
-  color: #687f74;
-  font-size: .68rem;
+  border-radius: 50%;
+  background: rgba(255,255,255,.72);
+  color: #587064;
+  box-shadow: 0 8px 22px rgba(46,91,69,.10);
+  font-size: 1.45rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform .18s ease, background .18s ease;
+}
+.settings-toggle.open { transform: rotate(45deg); background: rgba(255,255,255,.92); }
+
+.settings-menu {
+  position: absolute;
+  right: 0;
+  bottom: 50px;
+  z-index: 20;
+  width: min(210px, 72vw);
+  padding: 8px;
+  border: 1px solid rgba(255,255,255,.84);
+  border-radius: 18px;
+  background: rgba(255,255,255,.86);
+  box-shadow: 0 16px 40px rgba(52,94,74,.14);
+  backdrop-filter: blur(16px);
+}
+.settings-menu[hidden] { display: none; }
+.settings-menu button {
+  width: 100%;
+  padding: 9px 11px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: #516b5e;
+  text-align: left;
+  font-size: .76rem;
   cursor: pointer;
 }
-.settings-row button:hover { background: rgba(255,255,255,.8); color: #3d5e4e; }
-.settings-row button:focus-visible,
+.settings-menu button:hover { background: rgba(106,151,128,.09); color: #315247; }
+
+.settings-toggle:focus-visible,
+.settings-menu button:focus-visible,
 .actions button:focus-visible { outline: 3px solid rgba(52,150,105,.24); outline-offset: 2px; }
 
 .howto-panel {
-  margin-top: 8px;
+  margin: 0 50px 8px 0;
   padding: 11px 13px;
   border-radius: 16px;
-  background: rgba(255,255,255,.58);
+  background: rgba(255,255,255,.66);
   color: #61776c;
   font-size: .7rem;
   line-height: 1.45;
@@ -435,6 +480,16 @@ progress::-moz-progress-bar { background: #55c987; border-radius: 999px; }
   18% { opacity: 1; }
   100% { opacity: 0; transform: translate(var(--drift),-52px) scale(1.1) rotate(var(--spin)); }
 }
+@keyframes rippleRise {
+  0% { opacity: 0; transform: translate(0,8px) scale(.5); }
+  24% { opacity: .9; }
+  100% { opacity: 0; transform: translate(var(--drift),-38px) scale(1.7); }
+}
+@keyframes noteFloat {
+  0% { opacity: 0; transform: translateY(8px) rotate(-8deg) scale(.8); }
+  20% { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--drift),-58px) rotate(var(--spin)) scale(1.1); }
+}
 
 @media (max-width: 420px) {
   .pet-shell { gap: 10px; }
@@ -449,7 +504,7 @@ progress::-moz-progress-bar { background: #55c987; border-radius: 999px; }
   .slime.sleepy .eye, .slime.rest-react .eye, .slime.sleep-face .eye { top: 62px; }
   .bottom-panel { padding: 15px; border-radius: 24px; }
   .actions button { min-height: 48px; border-radius: 14px; font-size: .68rem; }
-  .settings-row button { font-size: .65rem; padding: 6px 8px; }
+  .settings-menu { width: min(200px, 74vw); }
 }
 
 @media (prefers-reduced-motion: reduce) {
