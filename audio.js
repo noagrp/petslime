@@ -16,7 +16,7 @@
       if (!ctx) {
         ctx = new AudioCtx();
         master = ctx.createGain();
-        master.gain.value = 0.18 * (sfxVolume / 65);
+        master.gain.value = 0.26 * (sfxVolume / 65);
         master.connect(ctx.destination);
       }
       if (ctx.state === 'suspended') ctx.resume().catch(() => {});
@@ -144,7 +144,7 @@
   function setSfxVolume(value) {
     sfxVolume = Math.max(0, Math.min(100, Number(value) || 0));
     localStorage.setItem(SFX_VOL_KEY, String(sfxVolume));
-    if (master) master.gain.value = 0.18 * (sfxVolume / 65);
+    if (master) master.gain.value = 0.26 * (sfxVolume / 65);
   }
 
   window.petSfx = sfx;
