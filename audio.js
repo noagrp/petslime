@@ -334,3 +334,251 @@
   addToggle();
   bindActionSounds();
 })();
+
+(() => {
+  const HOUR = 3600000;
+  const FUTURE_STAMP = 315360000000;
+  const FREE_COIN_CHANCE = .22;
+  const FREE_COIN_COOLDOWN = 12000;
+  const INTERACT_COIN_COOLDOWN = 2500;
+
+  const FOOD = {
+    '🍓': {name:'Strawberry', fullness:5, happiness:5, energy:0, cost:3},
+    '🍏': {name:'Green apple', fullness:7, happiness:2, energy:2, cost:5},
+    '🍪': {name:'Cookie', fullness:4, happiness:7, energy:1, cost:5},
+    '🍇': {name:'Grapes', fullness:6, happiness:3, energy:3, cost:6},
+    '🍉': {name:'Watermelon', fullness:10, happiness:3, energy:1, cost:8},
+    '🥕': {name:'Carrot', fullness:7, happiness:1, energy:4, cost:6}
+  };
+
+  const PLAY = {
+    jump:{happiness:8, energy:-7, fullness:-3},
+    dance:{happiness:10, energy:-10, fullness:-5},
+    sprint:{happiness:8, energy:-10, fullness:-4},
+    skip:{happiness:9, energy:-7, fullness:-4},
+    dodge:{happiness:7, energy:-7, fullness:-3},
+    roll:{happiness:7, energy:-7, fullness:-2}
+  };
+
+  const INTERACT_COINS = {highfive:1,peace:1,wave:1,hide:2,dig:3,bubble:1};
+  const HOME = {
+    tv:{happiness:5,energy:7,fullness:-2},
+    phone:{happiness:5,energy:-6,fullness:-2},
+    read:{happiness:4,energy:4,fullness:-2},
+    music:{happiness:8,energy:2,fullness:-2},
+    shower:{happiness:5,energy:4,fullness:-2},
+    bed:{happiness:0,energy:15,fullness:-5}
+  };
+
+  if (!Number.isFinite(Number(state.coins))) state.coins = 15;
+  state.coins = Math.max(0, Math.floor(Number(state.coins) || 0));
+  if (!Number.isFinite(Number(state.lastDecayAt))) state.lastDecayAt = Date.now();
+  if (!state.decayDebt || typeof state.decayDebt !== 'object') state.decayDebt = {fullness:0,happiness:0,energy:0};
+  if (!Number.isFinite(Number(state.lastFreeCoinAt))) state.lastFreeCoinAt = 0;
+  if (!Number.isFinite(Number(state.lastInteractCoinAt))) state.lastInteractCoinAt = 0;
+
+  const baseSaveState = saveState;
+  saveState = function(){
+    baseSaveState();
+    state.lastUpdated = Date.now() + FUTURE_STAMP;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  };
+
+  const style = document.createElement('style');
+  style.textContent = `
+    .coin-wallet{display:flex;align-items:center;justify-content:flex-end;gap:5px;margin:0 1px 7px;color:#4f5b4f;font-size:.86rem;font-weight:800;line-height:1}
+    .coin-wallet strong{min-width:22px;text-align:left;font-size:.92rem}
+    .care-option[data-food]{position:relative;overflow:visible}
+    .care-option[data-food]::after{content:attr(data-cost);position:absolute;right:-5px;bottom:-5px;min-width:14px;height:14px;padding:0 2px;box-sizing:border-box;display:grid;place-items:center;border-radius:999px;background:rgba(255,248,210,.96);border:1px solid rgba(171,139,52,.2);box-shadow:0 2px 6px rgba(90,73,30,.13);color:#80691d;font:800 9px/1 Arial,sans-serif}
+  `;
+  document.head.appendChild(style);
+
+  function ensureWallet(){
+    let wallet = document.getElementById('coin-wallet');
+    if (!wallet) {
+      const panel = document.querySelector('.bottom-panel');
+      const stats = panel?.querySelector('.stats');
+      if (!panel || !stats) return null;
+      wallet = document.createElement('div');
+      wallet.id = 'coin-wallet';
+      wallet.className = 'coin-wallet';
+      wallet.setAttribute('aria-label','Coin wallet');
+      wallet.innerHTML = '<span aria-hidden="true">🪙</span><strong id="coins-value">0</strong>';
+      panel.insertBefore(wallet, stats);
+    }
+    return wallet;
+  }
+
+  function updateWallet(){
+    ensureWallet();
+    const value = document.getElementById('coins-value');
+    if (value) value.textContent = String(Math.max(0, Math.floor(Number(state.coins) || 0)));
+  }
+
+  const baseRender = render;
+  render = function(message){
+    baseRender(message);
+    updateWallet();
+  };
+
+  function persist(){
+    state.coins = Math.max(0, Math.floor(Number(state.coins) || 0));
+    saveState();
+    updateWallet();
+  }
+
+  function applyDecay(show=false){
+    const now = Date.now();
+    const last = Number(state.lastDecayAt || now);
+    const hours = Math.min(72, Math.max(0, (now-last)/HOUR));
+    state.lastDecayAt = now;
+    const rates = {fullness:3,happiness:1,energy:.75};
+    let changed = false;
+    Object.keys(rates).forEach(key=>{
+      const debt = Math.max(0, Number(state.decayDebt[key]) || 0) + hours*rates[key];
+      const whole = Math.floor(debt);
+      state.decayDebt[key] = debt-whole;
+      if (whole>0) {
+        state[key] = Math.max(0, Number(state[key]) - whole);
+        changed = true;
+      }
+    });
+    if (changed && show) render();
+    persist();
+  }
+
+  function snapshot(){
+    return {happiness:Number(state.happiness),fullness:Number(state.fullness),energy:Number(state.energy),coins:Number(state.coins)};
+  }
+
+  function setFrom(before,delta){
+    state.happiness = before.happiness + (delta.happiness || 0);
+    state.fullness = before.fullness + (delta.fullness || 0);
+    state.energy = before.energy + (delta.energy || 0);
+  }
+
+  function appendCoins(message,amount){
+    return amount>0 ? `${message} · +${amount} 🪙` : message;
+  }
+
+  document.querySelectorAll('[data-food]').forEach(button=>{
+    const item = FOOD[button.dataset.food];
+    if (!item) return;
+    button.dataset.cost = String(item.cost);
+    button.title = `${item.name} · ${item.cost} coins`;
+    button.setAttribute('aria-label',`${item.name}, ${item.cost} coins`);
+  });
+
+  document.addEventListener('click',event=>{
+    const button = event.target.closest('[data-food],[data-play],[data-interact],[data-home]');
+    if (!button) return;
+    applyDecay(false);
+    const before = snapshot();
+    button._economyBefore = before;
+    button._economyBlocked = false;
+
+    if (button.matches('[data-food]')) {
+      const item = FOOD[button.dataset.food];
+      if (!item) return;
+      if (before.fullness >= 96) {
+        button._economyBlocked = true;
+        event.preventDefault(); event.stopImmediatePropagation();
+        react('tap-react',420); commit(`${state.name} is already completely full.`);
+        return;
+      }
+      if (before.coins < item.cost) {
+        button._economyBlocked = true;
+        event.preventDefault(); event.stopImmediatePropagation();
+        react('tap-react',420); commit(`Not enough coins for ${item.name}. Need ${item.cost} 🪙.`);
+        return;
+      }
+    }
+
+    if (button.matches('[data-play]')) {
+      const item = PLAY[button.dataset.play];
+      const needed = Math.abs(item?.energy || 0);
+      if (item && before.energy < needed) {
+        button._economyBlocked = true;
+        event.preventDefault(); event.stopImmediatePropagation();
+        react('rest-react',850); commit(`${state.name} is too sleepy for that right now.`);
+        return;
+      }
+    }
+
+    if (button.dataset.home === 'phone' && before.energy < 6) {
+      button._economyBlocked = true;
+      event.preventDefault(); event.stopImmediatePropagation();
+      react('rest-react',850); commit(`${state.name} is too sleepy to use the phone.`);
+    }
+  },true);
+
+  document.addEventListener('click',event=>{
+    const button = event.target.closest('[data-food],[data-play],[data-interact],[data-home]');
+    if (!button || button._economyBlocked || !button._economyBefore) return;
+    const before = button._economyBefore;
+    const currentMessage = els.message.textContent;
+
+    if (button.matches('[data-food]')) {
+      const item = FOOD[button.dataset.food];
+      setFrom(before,item);
+      state.coins = before.coins-item.cost;
+      commit(`${state.name} bought ${item.name} · −${item.cost} 🪙`);
+      return;
+    }
+
+    if (button.matches('[data-play]')) {
+      const item = PLAY[button.dataset.play];
+      if (!item) return;
+      setFrom(before,item);
+      state.coins = before.coins;
+      commit(currentMessage);
+      return;
+    }
+
+    if (button.matches('[data-interact]')) {
+      const kind = button.dataset.interact;
+      const reward = INTERACT_COINS[kind] || 0;
+      state.happiness = before.happiness + 3;
+      state.fullness = before.fullness;
+      state.energy = before.energy;
+      let earned = 0;
+      const now = Date.now();
+      if (reward>0 && now-Number(state.lastInteractCoinAt||0)>=INTERACT_COIN_COOLDOWN) {
+        earned = reward;
+        state.coins = before.coins + reward;
+        state.lastInteractCoinAt = now;
+      } else state.coins = before.coins;
+      commit(appendCoins(currentMessage,earned));
+      return;
+    }
+
+    if (button.matches('[data-home]')) {
+      const kind = button.dataset.home;
+      const item = HOME[kind];
+      if (!item) return;
+      if (kind==='bed' && before.energy>=97) return;
+      setFrom(before,item);
+      state.coins = before.coins;
+      let earned = 0;
+      if (kind==='phone' && Math.random()<.35) {
+        earned = 2;
+        state.coins += earned;
+      }
+      commit(appendCoins(currentMessage,earned));
+    }
+  });
+
+  const slime = document.getElementById('slime');
+  slime?.addEventListener('pointerup',()=>{
+    const now = Date.now();
+    if (now-Number(state.lastFreeCoinAt||0)<FREE_COIN_COOLDOWN) return;
+    if (Math.random()>=FREE_COIN_CHANCE) return;
+    state.coins += 1;
+    state.lastFreeCoinAt = now;
+    persist();
+  });
+
+  applyDecay(false);
+  updateWallet();
+  setInterval(()=>applyDecay(true),60000);
+})();
