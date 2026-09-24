@@ -1,4 +1,4 @@
-const CACHE='petslime-shell-v1';
+const CACHE='petslime-shell-v2';
 const SHELL=[
   './',
   './index.html',
