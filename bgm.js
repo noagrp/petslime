@@ -50,7 +50,8 @@
 
   function duckForSfx(name){
     if(audio.paused||!enabled)return;
-    const deep=new Set(['squish','roll-slow','roll-fast','dance-beat','impact','dig','tv','sleep','land']);
+    if(name==='eat'||name==='impact'){duck(620,Math.min(volume/100*.2,.025));return}
+    const deep=new Set(['squish','roll-slow','roll-fast','dance-beat','dig','tv','sleep','land']);
     const soft=new Set(['phone','paper','bubble','sparkle','hide','pet','bloop','excited']);
     if(deep.has(name)) duck(520,Math.min(volume/100*.28,.035));
     else if(soft.has(name)) duck(320,Math.min(volume/100*.52,.06));
@@ -60,7 +61,12 @@
   function installSfxDucking(){
     if(typeof window.petSfx!=='function'||window.petSfx.__bgmDucking)return;
     const original=window.petSfx;
-    const wrapped=function(name,...args){duckForSfx(name);return original(name,...args)};
+    const wrapped=function(name,...args){
+      duckForSfx(name);
+      const result=original(name,...args);
+      if(name==='eat'||name==='impact') original(name,...args);
+      return result;
+    };
     wrapped.__bgmDucking=true;
     window.petSfx=wrapped;
   }
