@@ -46,7 +46,24 @@
   function pause(){audio.pause();updatePlayer()}
   function activate(){if(activated)return;activated=true;if(enabled)play()}
   function setVolume(v){volume=Math.max(0,Math.min(40,Number(v)||0));audio.volume=volume/100;localStorage.setItem(VOL_KEY,String(volume))}
-  function duck(ms=6500){clearTimeout(duckTimer);const normal=volume/100;audio.volume=Math.min(normal,.06);duckTimer=setTimeout(()=>{audio.volume=volume/100},ms)}
+  function duck(ms=6500,target=.06){clearTimeout(duckTimer);const normal=volume/100;audio.volume=Math.min(normal,target);duckTimer=setTimeout(()=>{audio.volume=volume/100},ms)}
+
+  function duckForSfx(name){
+    if(audio.paused||!enabled)return;
+    const deep=new Set(['squish','roll-slow','roll-fast','dance-beat','impact','dig','tv','sleep','land']);
+    const soft=new Set(['phone','paper','bubble','sparkle','hide','pet','bloop','excited']);
+    if(deep.has(name)) duck(520,Math.min(volume/100*.28,.035));
+    else if(soft.has(name)) duck(320,Math.min(volume/100*.52,.06));
+    else duck(400,Math.min(volume/100*.42,.05));
+  }
+
+  function installSfxDucking(){
+    if(typeof window.petSfx!=='function'||window.petSfx.__bgmDucking)return;
+    const original=window.petSfx;
+    const wrapped=function(name,...args){duckForSfx(name);return original(name,...args)};
+    wrapped.__bgmDucking=true;
+    window.petSfx=wrapped;
+  }
 
   function previous(){
     if(!tracks.length||index<=0)return;
@@ -168,7 +185,8 @@
   });
   ['pointerdown','keydown','touchstart'].forEach(type=>document.addEventListener(type,activate,{once:true,passive:true}));
   document.addEventListener('visibilitychange',()=>{document.hidden?pause():(enabled&&!finished&&play())});
-  document.querySelector('[data-home="music"]')?.addEventListener('click',()=>{duck(6500);setTimeout(()=>window.petSfx?.('chime'),480)});
+  document.querySelector('[data-home="music"]')?.addEventListener('click',()=>{duck(6500,.06);setTimeout(()=>window.petSfx?.('chime'),480)});
+  installSfxDucking();
   window.petBgm={play,pause,setVolume,duck,previous,next,get tracks(){return tracks.map(track=>track.name)},get index(){return index},get source(){return tracks[index]?.url||''}};
   moveSettings();
   bindSettingsToggle();
